@@ -1,0 +1,67 @@
+
+
+from typing import List
+
+
+import math
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+
+
+
+class GCN(nn.Module):
+  def __init__(self, infeat: int, hidfeat: int, outfeat: int, num_layers: int, dropout: float):
+    super(GCN, self).__init__()
+    self.gcs: List[nn.Module] = []
+    self.gcs.append(GraphConvolution(in_features= infeat, out_features= hidfeat))
+    self.dropout: float = dropout
+    for i in range(layers-2):
+      self.gcs.append(GraphConvolution(in_features= hidfeat, out_features= hidfeat))
+    self.gcs.append(GraphConvolution(in_features= hidfeat, out_features= outfeat))
+  
+  def forward(self, x: torch.Tensor, adjs: List[torch.Tensor]) -> torch.Tensor:
+    for l in range(len(self.gcs)):
+      x = self.gcs[l](x, adjs[l])
+      if l != len(self.gcs)-1:
+        x = F.dropout(F.relu(x), p= self.dropout, training= self.training)
+
+      x = self.dropout( self.gcs[idx](x, adjs[idx]))
+    return x
+
+
+class GraphConvolution(nn.Module):
+    """
+    Simple GCN layer, similar to https://arxiv.org/abs/1609.02907
+    """
+
+    def __init__(self, in_features: int, out_features: int, bias: bool =True):
+        super(GraphConvolution, self).__init__()
+        self.in_features: int = in_features
+        self.out_features: int = out_features
+        self.weight: nn.Parameter = nn.Parameter(torch.FloatTensor(in_features, out_features))
+        if bias:
+            self.bias: nn.Parameter = nn.Parameter(torch.FloatTensor(out_features))
+        else:
+            self.register_parameter('bias', None)
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        stdv = 1. / math.sqrt(self.weight.size(1))
+        self.weight.data.uniform_(-stdv, stdv)
+        if self.bias is not None:
+            self.bias.data.uniform_(-stdv, stdv)
+
+    def forward(self, input: torch.Tensor, adj: torch.Tensor) -> torch.Tensor:
+        support = torch.mm(input, self.weight)
+        output = torch.spmm(adj, support)
+        if self.bias is not None:
+            return output + self.bias
+        else:
+            return output
+
+    def __repr__(self) -> str:
+        return self.__class__.__name__ + ' (' \
+               + str(self.in_features) + ' -> ' \
+               + str(self.out_features) + ')'
