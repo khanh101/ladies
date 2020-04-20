@@ -26,8 +26,6 @@ class GCN(nn.Module):
       x = self.gcs[l](x, adjs[l])
       if l != len(self.gcs)-1:
         x = F.dropout(F.relu(x), p= self.dropout, training= self.training)
-
-      x = self.dropout( self.gcs[idx](x, adjs[idx]))
     return x
 
 
