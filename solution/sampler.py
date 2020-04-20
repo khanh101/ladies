@@ -27,13 +27,16 @@ def ladies_sampler(seed: int, batch_nodes: np.ndarray, samp_num_list: nd.ndarray
         Sample nodes from top to bottom, based on the probability computed adaptively (layer-dependent).
     '''
     for d in range(depth):
-        """
-        u = np.square(lap_matrix[previous_nodes, :])
-        pi = u/np.sum(u, axis= 0)
-        s_num = np.min([np.sum(pi > 0), samp_num_list[d]])
+        """ NEW
+        #     row-select the lap_matrix (U) by previously sampled nodes
+        U = lap_matrix[previous_nodes , :]
+        #     Only use the upper layer's neighborhood to calculate the probability.
+        pi = np.sum(U**2, axis=0)
+        p = pi / np.sum(pi)
+        s_num = np.min([np.sum(p > 0), samp_num_list[d]])
         """
 
-        # THESE LINES OF CODE MIGHT BE WRONG
+        # ORIGINAL: THESE LINES OF CODE MIGHT BE WRONG
         #     row-select the lap_matrix (U) by previously sampled nodes
         U = lap_matrix[previous_nodes , :]
         #     Only use the upper layer's neighborhood to calculate the probability.
