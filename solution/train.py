@@ -1,11 +1,12 @@
 #!/usr/bin/env python
-
+import pdb
 import argparse
 
 import torch
 import torch.nn as nn
 
 from module import GCN
+from utils import load_data
 
 
 class Trainer(object):
@@ -41,4 +42,6 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   gcn = GCN(in_features= 5, hidden_features= 5, out_features= 5, num_layers= 5, dropout= 0.5)
-
+  # load data
+  edges, labels, feat_data, num_classes, train_nodes, valid_nodes, test_nodes = load_data('cora')
+  pdb.set_trace()

@@ -5,7 +5,10 @@ from typing import Tuple
 from utils import sparse_mx_to_torch_sparse_tensor, row_normalize
 
 """
-sampler: Callable[[], ]
+def default_sampler(seed: int, batch_nodes: np.ndarray, samp_num_list: nd.ndarray, num_nodes: int, lap_matrix: sp.sparse.spmatrix, depth: int) -> Tuple[List[torch.Tensor], np.ndarray, np.ndarray]:
+    seed: seed
+    batch_nodes: 1d array of nodes at output layer
+    samp_num_list: 
 """
 
 def default_sampler(seed: int, batch_nodes: np.ndarray, samp_num_list: nd.ndarray, num_nodes: int, lap_matrix: sp.sparse.spmatrix, depth: int) -> Tuple[List[torch.Tensor], np.ndarray, np.ndarray]:
@@ -24,12 +27,22 @@ def ladies_sampler(seed: int, batch_nodes: np.ndarray, samp_num_list: nd.ndarray
         Sample nodes from top to bottom, based on the probability computed adaptively (layer-dependent).
     '''
     for d in range(depth):
+        """
+        u = np.square(lap_matrix[previous_nodes, :])
+        pi = u/np.sum(u, axis= 0)
+        s_num = np.min([np.sum(pi > 0), samp_num_list[d]])
+        """
+
+        # THESE LINES OF CODE MIGHT BE WRONG
         #     row-select the lap_matrix (U) by previously sampled nodes
         U = lap_matrix[previous_nodes , :]
         #     Only use the upper layer's neighborhood to calculate the probability.
         pi = np.array(np.sum(U, axis=0))[0]
         p = pi / np.sum(pi)
         s_num = np.min([np.sum(p > 0), samp_num_list[d]])
+
+
+
         #     sample the next layer's nodes based on the adaptively probability (p).
         after_nodes = np.random.choice(num_nodes, s_num, p = p, replace = False)
         #     Add output nodes for self-loop
