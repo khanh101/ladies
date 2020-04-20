@@ -12,14 +12,14 @@ import torch.nn.functional as F
 
 
 class GCN(nn.Module):
-  def __init__(self, infeat: int, hidfeat: int, outfeat: int, num_layers: int, dropout: float):
+  def __init__(self, in_features: int, hidden_features: int, out_features: int, num_layers: int, dropout: float):
     super(GCN, self).__init__()
     self.gcs: List[nn.Module] = []
-    self.gcs.append(GraphConvolution(in_features= infeat, out_features= hidfeat))
+    self.gcs.append(GraphConvolution(in_features= in_features, out_features= hidden_features))
     self.dropout: float = dropout
-    for i in range(layers-2):
-      self.gcs.append(GraphConvolution(in_features= hidfeat, out_features= hidfeat))
-    self.gcs.append(GraphConvolution(in_features= hidfeat, out_features= outfeat))
+    for i in range(num_layers-2):
+      self.gcs.append(GraphConvolution(in_features= hidden_features, out_features= hidden_features))
+    self.gcs.append(GraphConvolution(in_features= hidden_features, out_features= out_features))
   
   def forward(self, x: torch.Tensor, adjs: List[torch.Tensor]) -> torch.Tensor:
     for l in range(len(self.gcs)):
@@ -65,3 +65,6 @@ class GraphConvolution(nn.Module):
         return self.__class__.__name__ + ' (' \
                + str(self.in_features) + ' -> ' \
                + str(self.out_features) + ')'
+
+if __name__ == "__main__":
+  gcn = GCN(in_features= 10, hidden_features= 5, out_features = 5, num_layers = 5, dropout= 0.5)
