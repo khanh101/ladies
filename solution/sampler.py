@@ -44,6 +44,5 @@ def ladies_sampler(seed: int, batch_nodes: np.ndarray, samp_num_list: nd.ndarray
     adjs.reverse()
     return adjs, previous_nodes, batch_nodes
 
-
 if __name__ == "__main__":
   pass
