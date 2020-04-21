@@ -21,10 +21,13 @@ from utils import adj_to_lap_matrix, row_normalize, sparse_mx_to_torch_sparse_te
 #np.seterr(all="raise")
 
 def random_sampling_train(args: SimpleNamespace, model: SimpleNamespace, data: SimpleNamespace) -> SimpleNamespace:
-  batch_nodes = np.random.choice(data.train_nodes, size= args.batch_size)
+  if args.batch_size <= 0 or args.batch_size >= len(data.train_nodes):
+    batch_nodes = data.train_nodes
+  else:
+    batch_nodes = np.random.choice(data.train_nodes, size= args.batch_size, replace= True)
   sample = ladies_sampler(
     batch_nodes= batch_nodes,
-    samp_num_list= [args.batch_size for _ in range(args.num_layers)],
+    samp_num_list= [len(batch_nodes) for _ in range(args.num_layers)],
     num_nodes= data.num_nodes,
     lap_matrix= data.lap_matrix,
     lap2_matrix= data.lap2_matrix,
@@ -54,7 +57,7 @@ if __name__ == "__main__":
                       help='Hidden layer dimension')
   parser.add_argument('--num_epochs', type=int, default= 100,
                       help='Number of Epoch')
-  parser.add_argument('--batch_size', type=int, default=64,
+  parser.add_argument('--batch_size', type=int, default=-1,
                       help='size of output node in a batch')
   parser.add_argument('--num_layers', type=int, default=5,
                       help='Number of GCN layers')
