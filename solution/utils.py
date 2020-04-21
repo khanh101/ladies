@@ -8,7 +8,7 @@ import sys
 import pickle as pkl
 
 def adj_to_lap_matrix(adj_matrix: sparse.csr_matrix) -> sparse.csr_matrix:
-    lap_matrix = row_normalize(adj_matrix + sparse.csr_matrix(np.eye(adj_matrix.shape[0])))
+    lap_matrix = adj_matrix + sparse.eye(adj_matrix.shape[0])
     return lap_matrix
 
 def row_normalize(mx):

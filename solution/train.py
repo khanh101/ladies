@@ -14,7 +14,7 @@ import torch.nn.functional as F
 from module import GCN, Classifier
 from load_data import load
 from sampler import full_sampler, ladies_sampler
-from utils import adj_to_lap_matrix
+from utils import adj_to_lap_matrix, row_normalize
 
 def random_sampling_train(args: SimpleNamespace, model: SimpleNamespace, data: SimpleNamespace) -> SimpleNamespace:
   batch_nodes = np.random.choice(data.train_nodes, size= args.batch_size)
@@ -60,7 +60,8 @@ if __name__ == "__main__":
   data.in_features = data.features.shape[1]
   data.out_features = len(np.unique(data.labels))
   data.lap_matrix = adj_to_lap_matrix(data.adj_matrix)
-  data.lap2_matrix = np.multiply(data.lap_matrix, data.lap_matrix)
+  lap_norm_matrix = row_normalize(data.lap_matrix)
+  data.lap2_matrix = np.multiply(lap_norm_matrix, lap_norm_matrix)
   # create model
   model: SimpleNamespace = SimpleNamespace()
   model.pool = mp.Pool(processes= args.num_processes)

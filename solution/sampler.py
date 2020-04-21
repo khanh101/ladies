@@ -11,7 +11,10 @@ from utils import row_normalize
 def full_sampler(seed: int, batch_nodes: np.ndarray, samp_num_list: nd.ndarray, num_nodes: int, lap2_matrix: sp.sparse.spmatrix, num_layers: int) -> Tuple[List[torch.Tensor], np.ndarray, np.ndarray]:
     seed: seed
     batch_nodes: 1d array of nodes at output layer
-    samp_num_list: 
+    samp_num_list: number of sampled node in each layer
+    num_nodes: number of nodes
+    lap2_matrix: row-normalized laplacian matrix
+    num_layers: number of layers
 """
 
 def full_sampler(batch_nodes: np.ndarray, samp_num_list: np.ndarray, num_nodes: int, lap2_matrix: sparse.csr_matrix, num_layers: int) -> SimpleNamespace:
