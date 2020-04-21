@@ -1,5 +1,6 @@
 import numpy as np
 import sys
+from types import SimpleNamespace
 import scipy.sparse as sp
 import pickle as pkl
 
@@ -48,28 +49,24 @@ def load():
     idx_val = np.array(range(len(y), len(y)+500))
 
 
-    degrees = np.zeros(len(labels), dtype=np.int64)
     edges = []
     for s in graph:
         for t in graph[s]:
             edges += [[s, t]]
-        degrees[s] = len(graph[s])
 
     adj_matrix = get_adj(np.array(edges), labels.shape[0])
-    tmp = idx_test
-    idx_test = idx_train
-    idx_train = tmp
+    idx_train, idx_test = idx_test, idx_train
 
-    return   adj_matrix, idx_train, idx_val, idx_test, np.array(edges), degrees, labels, features
+    data = SimpleNamespace(
+        adj_matrix= adj_matrix,
+        train_nodes= idx_train,
+        valid_nodes= idx_val,
+        test_nodes=idx_test,
+        labels= labels,
+        features= features,
+    ) 
+
+    return data
 if __name__ == "__main__":
-    adj_matrix, train_nodes, valid_nodes, test_nodes, edges, labels, feat_data, num_classes = load()
-    print(train_nodes.shape)
-    print(valid_nodes.shape)
-    print(test_nodes.shape)
-    print(adj_matrix.shape)
-    print(edges.shape)
-    print(labels.shape)
-    print(feat_data.shape)
-    print(num_classes.shape)
     import pdb
     pdb.set_trace()
