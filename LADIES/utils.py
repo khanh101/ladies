@@ -197,7 +197,7 @@ def normalize(mx):
     mx = r_mat_inv.dot(mx).dot(c_mat_inv)
     return mx
 
-def row_norm(mx):
+def row_normalize(mx):
     rowsum = np.array(mx.sum(1))
     r_inv = np.power(rowsum, -1).flatten()
     r_inv[np.isinf(r_inv)] = 0.

@@ -5,10 +5,11 @@
 from utils import *
 from tqdm import tqdm
 import argparse
-
+import scipy
 
 import sys; sys.argv=['']; del sys
 import warnings
+import multiprocessing as mp
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -18,7 +19,7 @@ parser = argparse.ArgumentParser(description='Training GCN on Cora/CiteSeer/PubM
 '''
     Dataset arguments
 '''
-parser.add_argument('--dataset', type=str, default='reddit',
+parser.add_argument('--dataset', type=str, default='citeseer',
                     help='Dataset name: Cora/CiteSeer/PubMed/Reddit')
 parser.add_argument('--nhid', type=int, default=256,
                     help='Hidden state dimension')
@@ -40,7 +41,7 @@ parser.add_argument('--samp_num', type=int, default=64,
                     help='Number of sampled nodes per layer')
 parser.add_argument('--sample_method', type=str, default='ladies',
                     help='Sampled Algorithms: ladies/fastgcn/full')
-parser.add_argument('--cuda', type=int, default=0,
+parser.add_argument('--cuda', type=int, default=-1,
                     help='Avaiable GPU ID')
 
 
@@ -179,7 +180,7 @@ if args.cuda != -1:
     device = torch.device("cuda:" + str(args.cuda))
 else:
     device = torch.device("cpu")
-edges, labels, feat_data, num_classes, train_nodes, valid_nodes, test_nodes = load_data('reddit')
+edges, labels, feat_data, num_classes, train_nodes, valid_nodes, test_nodes = load_data(args.dataset)
 
 
 
