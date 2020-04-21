@@ -104,7 +104,7 @@ if __name__ == "__main__":
   )
 
   model.module.to(device)
-  optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.module.parameters()))
+  optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.module.parameters()), lr=1e-2)
   criterion = nn.CrossEntropyLoss()
   losses = []
   for epoch in range(args.num_epochs):
@@ -144,6 +144,6 @@ if __name__ == "__main__":
     print(f"Epoch {epoch}: Loss {loss}", flush= True)
 
   import matplotlib.pyplot as plt
-  plt.draw(np.arange(len(losses), losses))
+  plt.plot(np.arange(len(losses)), losses)
   plt.show()
   pdb.set_trace()
