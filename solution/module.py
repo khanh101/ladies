@@ -14,6 +14,8 @@ import torch.nn.functional as F
 class GCN(nn.Module):
   def __init__(self, in_features: int, hidden_features: int, out_features: int, num_layers: int, dropout: float):
     super(GCN, self).__init__()
+    self.in_features: int = in_features
+    self.out_features: int = out_features
     self.gcs: nn.ModuleList = nn.ModuleList()
     self.gcs.append(GraphConvolution(in_features= in_features, out_features= hidden_features))
     self.dropout: float = dropout

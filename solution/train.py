@@ -11,12 +11,17 @@ from module import GCN
 from load_data import load
 
 
-class Module(nn.Module):
-  def __init__(self, in_features: int, hidden_features: int, out_features: int, num_layers: int, dropout: float):
-    super(Module, self).__init__()
-    self.encoder = GCN(in_features= in_features, hidden_features= hidden_features, out_features= out_features, num_layers = num_layers, dropout= dropout)
+class Classifier(nn.Module):
+  def __init__(self, encoder: nn.Module, in_features: int, out_features: int, dropout: float):
+    super(Classifier, self).__init__()
+    self.encoder = encoder
+    self.dropout = nn.Dropout(p= dropout)
+    self.linear = nn.Linear(in_features= in_features, out_features= out_features, bias= True)
   def forward(self, x: torch.Tensor, adjs: List[torch.Tensor]) -> torch.Tensor:
-    return F.log_softmax(self.encoder(x= x, adjs= adjs))
+    x = self.encoder(x= x, adjs= adjs)
+    x = self.dropout(x)
+    x = self.linear(x)
+    return F.log_softmax(x)
 
 class Trainer(object):
   def __init__(self, module: nn.Module):
