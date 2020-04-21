@@ -61,13 +61,15 @@ def load():
     idx_train = tmp
 
     return   adj_matrix, idx_train, idx_val, idx_test, np.array(edges), degrees, labels, features
-
-#adj_matrix, train_nodes, valid_nodes, test_nodes, edges, labels, feat_data, num_classes = load()
-#print(train_nodes.shape)
-#print(valid_nodes.shape)
-#print(test_nodes.shape)
-#print(adj_matrix.shape)
-#print(edges.shape)
-#print(labels.shape)
-#print(feat_data.shape)
-#print(num_classes.shape)
+if __name__ == "__main__":
+    adj_matrix, train_nodes, valid_nodes, test_nodes, edges, labels, feat_data, num_classes = load()
+    print(train_nodes.shape)
+    print(valid_nodes.shape)
+    print(test_nodes.shape)
+    print(adj_matrix.shape)
+    print(edges.shape)
+    print(labels.shape)
+    print(feat_data.shape)
+    print(num_classes.shape)
+    import pdb
+    pdb.set_trace()
