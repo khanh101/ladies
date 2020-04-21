@@ -16,6 +16,20 @@ def get_adj(edges, num_nodes):
                     shape=(num_nodes, num_nodes), dtype=np.float32)
     return adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
 
+def onehot_to_labels(onehot: np.ndarray) -> np.ndarray:
+  out = []
+  no_label = 0
+  for row in onehot:
+    where = np.where(row==1)
+    if len(where[0]) == 1:
+      out.append(where[0][0])
+    else:
+      no_label += 1
+      out.append(0)
+  print(f" nolabel {no_label} ", end="")
+  return np.array(out)
+  return np.array([np.where(row==1)[0][0] for row in onehot])
+
 def load():
     names = ['x', 'y', 'tx', 'ty', 'allx', 'ally', 'graph']
     objects = []
@@ -56,6 +70,8 @@ def load():
 
     adj_matrix = get_adj(np.array(edges), labels.shape[0])
     idx_train, idx_test = idx_test, idx_train
+
+    labels = onehot_to_labels(labels)
 
     data = SimpleNamespace(
         adj_matrix= adj_matrix,

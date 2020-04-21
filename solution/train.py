@@ -37,7 +37,8 @@ def random_sampling_train(args: SimpleNamespace, model: SimpleNamespace, data: S
 
 def sampling_valid(args: SimpleNamespace, model: SimpleNamespace, data: SimpleNamespace) -> SimpleNamespace:
   sample = full_sampler(
-    batch_nodes= data.valid_nodes,
+    #batch_nodes= data.valid_nodes,
+    batch_nodes= np.arange(data.num_nodes),
     samp_num_list= None,
     num_nodes= data.num_nodes,
     lap_matrix= data.lap_matrix,
@@ -46,8 +47,6 @@ def sampling_valid(args: SimpleNamespace, model: SimpleNamespace, data: SimpleNa
   )
   return sample
 
-def onehot_to_labels(onehot: np.ndarray) -> np.ndarray:
-  return np.array([np.where(row==1)[0][0] for row in onehot])
 
 
 if __name__ == "__main__":
@@ -57,11 +56,11 @@ if __name__ == "__main__":
                       help='Hidden layer dimension')
   parser.add_argument('--num_epochs', type=int, default= 100,
                       help='Number of Epoch')
-  parser.add_argument('--batch_size', type=int, default=64,
+  parser.add_argument('--batch_size', type=int, default=512,
                       help='size of output node in a batch')
   parser.add_argument('--num_layers', type=int, default=5,
                       help='Number of GCN layers')
-  parser.add_argument('--num_iterations', type=int, default=200,
+  parser.add_argument('--num_iterations', type=int, default=50,
                       help='Number of iteration to run on a batch')
   parser.add_argument('--sampling_method', type=str, default='full',
                       help='Sampled Algorithms: full/ladies')
@@ -85,9 +84,10 @@ if __name__ == "__main__":
   data = load()
   data.num_nodes = data.features.shape[0]
   data.in_features = data.features.shape[1]
-  data.out_features = data.labels.shape[1]
+  data.out_features = len(np.unique(data.labels))
   data.lap_matrix = row_normalize(adj_to_lap_matrix(data.adj_matrix))
   data.lap2_matrix = np.multiply(data.lap_matrix, data.lap_matrix)
+  pdb.set_trace()
   # create pool
   pool = mp.Pool(processes= 1)
   # create model
@@ -131,7 +131,7 @@ if __name__ == "__main__":
       )
       loss = criterion(
         output[sample.output_nodes],
-        torch.from_numpy(onehot_to_labels(data.labels[sample.output_nodes])).long(),
+        torch.from_numpy(data.labels[sample.output_nodes]).long(),
       )
       loss.backward()
       torch.nn.utils.clip_grad_norm_(model.module.parameters(), 0.2)
@@ -147,13 +147,13 @@ if __name__ == "__main__":
     )
     loss = criterion(
       output[sample.output_nodes],
-      torch.from_numpy(onehot_to_labels(data.labels[sample.output_nodes])).long(),
+      torch.from_numpy(data.labels[sample.output_nodes]).long(),
     )
     output = output.detach().cpu()
     loss = loss.detach().cpu()
     f1 = f1_score(
       output[sample.output_nodes].argmax(dim=1),
-      onehot_to_labels(data.labels[sample.output_nodes]),
+      data.labels[sample.output_nodes],
       average= "micro",
     )
     losses.append(loss)
