@@ -163,11 +163,11 @@ def prepare_data(pool, sampler, process_ids, train_nodes, valid_nodes, samp_num_
     for _ in process_ids:
         idx = torch.randperm(len(train_nodes))[:args.batch_size]
         batch_nodes = train_nodes[idx]
-        p = pool.apply_async(sampler, args=(np.random.randint(2**32 - 1), batch_nodes,                                                    samp_num_list, num_nodes, lap_matrix, depth))
+        p = pool.apply_async(sampler, args=(np.random.randint(2**32 - 1), batch_nodes, samp_num_list, num_nodes, lap_matrix, depth))
         jobs.append(p)
     idx = torch.randperm(len(valid_nodes))[:args.batch_size]
     batch_nodes = valid_nodes[idx]
-    p = pool.apply_async(sampler, args=(np.random.randint(2**32 - 1), batch_nodes,                                                samp_num_list * 20, num_nodes, lap_matrix, depth))
+    p = pool.apply_async(sampler, args=(np.random.randint(2**32 - 1), batch_nodes, samp_num_list * 20, num_nodes, lap_matrix, depth))
     jobs.append(p)
     return jobs
 def package_mxl(mxl, device):
