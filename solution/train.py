@@ -3,7 +3,7 @@ import pdb
 import argparse
 from typing import List, Dict
 from types import SimpleNamespace
-import multiprocessing as mp
+#import multiprocessing as mp
 
 import numpy as np
 import scipy as sp
@@ -57,7 +57,7 @@ if __name__ == "__main__":
                       help='Number of GCN layers')
   parser.add_argument('--num_iterations', type=int, default=10,
                       help='Number of iteration to run on a batch')
-  parser.add_argument('--sampling_method', type=str, default='full',
+  parser.add_argument('--sampling_method', type=str, default='ladies',
                       help='Sampled Algorithms: full/ladies')
   parser.add_argument('--cuda', type=int, default=-1,
                       help='Avaiable GPU ID')
