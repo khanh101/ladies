@@ -29,6 +29,17 @@ def random_sampling_train(args: SimpleNamespace, model: SimpleNamespace, data: S
   )
   return sample
 
+def sampling_valid(args: SimpleNamespace, model: SimpleNamespace, data: SimpleNamespace) -> SimpleNamespace:
+  sample = full_sampler(
+    batch_nodes= data.valid_nodes,
+    samp_num_list= None,
+    num_nodes= data.num_nodes,
+    lap_matrix= data.lap_matrix,
+    lap2_matrix= None,
+    num_layers= args.num_layers,
+  )
+
+
 def onehot_to_labels(onehot: np.ndarray) -> np.ndarray:
   return np.array([np.where(row==1)[0][0] for row in onehot])
 
@@ -91,17 +102,15 @@ if __name__ == "__main__":
   )
 
   model.module.to(device)
-  # train
   optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.module.parameters()))
   criterion = nn.CrossEntropyLoss()
   losses = []
   for epoch in range(args.num_epochs):
     # train
-    model.module.train()
+    model.module.train() # train mode
+    print(f"Epoch {epoch}: ", end= "", flush= True)
     for iter in range(args.num_iterations):
-      print(f"Epoch {epoch} Iteration {iter}", flush= True)
       sample = random_sampling_train(args, model, data)
-      value = sparse_mx_to_torch_sparse_tensor(sample.adjs[0])
       optimizer.zero_grad()
       output = model.module(
         x= sparse_mx_to_torch_sparse_tensor(data.features[sample.input_nodes]),
@@ -109,14 +118,24 @@ if __name__ == "__main__":
       )
       loss = criterion(
         output[sample.output_nodes],
-        torch.from_numpy(onehot_to_labels(data.labels[sample.output_nodes])).long())
+        torch.from_numpy(onehot_to_labels(data.labels[sample.output_nodes])).long(),
+      )
       loss.backward()
       torch.nn.utils.clip_grad_norm_(model.module.parameters(), 0.2)
       optimizer.step()
       losses.append(loss.detach().tolist())
       del loss
     # eval
-    model.module.eval()
-
+    model.module.eval() # eval mode
+    sample = sampling_valid(args, model, data)
+    output = model.module(
+      x= sparse_mx_to_torch_sparse_tensor(data.features[sample.input_nodes]),
+      adjs= list(map(lambda adj: sparse_mx_to_torch_sparse_tensor(adj).to(device), sample.adjs)),
+    )
+    loss = criterion(
+      output[sample.output_nodes],
+      torch.from_numpy(onehot_to_labels(data.labels[sample.output_nodes])).long(),
+    ).cpu()
+    print(f"Loss {loss}", flush= True)
 
   pdb.set_trace()
