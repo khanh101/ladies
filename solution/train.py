@@ -21,7 +21,7 @@ from utils import adj_to_lap_matrix, row_normalize, sparse_mx_to_torch_sparse_te
 
 def random_sampling_train(args: SimpleNamespace, model: SimpleNamespace, data: SimpleNamespace) -> SimpleNamespace:
   batch_nodes = np.random.choice(data.train_nodes, size= args.batch_size)
-  sample = model.sampler(
+  sample = ladies_sampler(
     batch_nodes= batch_nodes,
     samp_num_list= [args.batch_size for _ in range(args.num_layers)],
     num_nodes= data.num_nodes,
@@ -57,21 +57,21 @@ if __name__ == "__main__":
                       help='size of output node in a batch')
   parser.add_argument('--num_layers', type=int, default=5,
                       help='Number of GCN layers')
-  parser.add_argument('--num_iterations', type=int, default=10,
+  parser.add_argument('--num_iterations', type=int, default=1,
                       help='Number of iteration to run on a batch')
   parser.add_argument('--sampling_method', type=str, default='full',
                       help='Sampled Algorithms: full/ladies')
   parser.add_argument('--cuda', type=int, default=-1,
                       help='Avaiable GPU ID')
-  parser.add_argument('--num_processes', type=int, default= 1,
-                    help='Number of Pool Processes')
+  #parser.add_argument('--num_processes', type=int, default= 1,
+  #                  help='Number of Pool Processes')
   parser.add_argument('--dropout', type=float, default= 0.5,
                     help='Dropout probability')
-  parser.add_argument('--seed', type=int, 
-                    help='Random Seed')
+  #parser.add_argument('--seed', type=int, 
+  #                  help='Random Seed')
 
   args = parser.parse_args()
-
+  print(args)
   # set up device
   if args.cuda != -1:
     device = torch.device("cuda:" + str(args.cuda))
@@ -126,8 +126,7 @@ if __name__ == "__main__":
       loss.backward()
       torch.nn.utils.clip_grad_norm_(model.module.parameters(), 0.2)
       optimizer.step()
-      losses.append(loss.detach().tolist())
-      print(f"Loss {loss.cpu()}", flush= True)
+      print(f"Loss {loss.detach().cpu()}", flush= True)
       del loss
     # eval
     model.module.eval() # eval mode
@@ -139,7 +138,11 @@ if __name__ == "__main__":
     loss = criterion(
       output[sample.output_nodes],
       torch.from_numpy(onehot_to_labels(data.labels[sample.output_nodes])).long(),
-    ).cpu()
+    ).detach().cpu()
+    losses.append(loss)
     print(f"Epoch {epoch}: Loss {loss}", flush= True)
 
+  import matplotlib.pyplot as plt
+  plt.draw(np.arange(len(losses), losses))
+  plt.show()
   pdb.set_trace()
