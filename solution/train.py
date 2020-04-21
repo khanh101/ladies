@@ -38,7 +38,7 @@ def sampling_valid(args: SimpleNamespace, model: SimpleNamespace, data: SimpleNa
     lap2_matrix= None,
     num_layers= args.num_layers,
   )
-
+  return sample
 
 def onehot_to_labels(onehot: np.ndarray) -> np.ndarray:
   return np.array([np.where(row==1)[0][0] for row in onehot])
@@ -55,7 +55,7 @@ if __name__ == "__main__":
                       help='size of output node in a batch')
   parser.add_argument('--num_layers', type=int, default=5,
                       help='Number of GCN layers')
-  parser.add_argument('--num_iterations', type=int, default=100,
+  parser.add_argument('--num_iterations', type=int, default=10,
                       help='Number of iteration to run on a batch')
   parser.add_argument('--sampling_method', type=str, default='full',
                       help='Sampled Algorithms: full/ladies')
@@ -108,8 +108,9 @@ if __name__ == "__main__":
   for epoch in range(args.num_epochs):
     # train
     model.module.train() # train mode
-    print(f"Epoch {epoch}: ", end= "", flush= True)
+    print(f"Epoch {epoch}: ", flush= True)
     for iter in range(args.num_iterations):
+      print(f"\tIteration {iter}: ", end= "", flush= True)
       sample = random_sampling_train(args, model, data)
       optimizer.zero_grad()
       output = model.module(
@@ -124,6 +125,7 @@ if __name__ == "__main__":
       torch.nn.utils.clip_grad_norm_(model.module.parameters(), 0.2)
       optimizer.step()
       losses.append(loss.detach().tolist())
+      print(f"Loss {loss.cpu()}", flush= True)
       del loss
     # eval
     model.module.eval() # eval mode
@@ -136,6 +138,6 @@ if __name__ == "__main__":
       output[sample.output_nodes],
       torch.from_numpy(onehot_to_labels(data.labels[sample.output_nodes])).long(),
     ).cpu()
-    print(f"Loss {loss}", flush= True)
+    print(f"Epoch {epoch}: Loss {loss}", flush= True)
 
   pdb.set_trace()
