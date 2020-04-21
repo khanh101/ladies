@@ -17,6 +17,8 @@ from load_data import load
 from sampler import full_sampler, ladies_sampler
 from utils import adj_to_lap_matrix, row_normalize, sparse_mx_to_torch_sparse_tensor
 
+#np.seterr(all="raise")
+
 def random_sampling_train(args: SimpleNamespace, model: SimpleNamespace, data: SimpleNamespace) -> SimpleNamespace:
   batch_nodes = np.random.choice(data.train_nodes, size= args.batch_size)
   sample = model.sampler(

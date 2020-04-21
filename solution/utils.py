@@ -13,6 +13,7 @@ def adj_to_lap_matrix(adj_matrix: sparse.csr_matrix) -> sparse.csr_matrix:
 
 def row_normalize(mx):
     rowsum = np.array(mx.sum(1))
+    rowsum[rowsum == 0] = 1 # rowsum -> no need to divide
     r_inv = np.power(rowsum, -1).flatten()
     r_inv[np.isinf(r_inv)] = 0.
     r_mat_inv = sparse.diags(r_inv)
