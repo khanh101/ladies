@@ -67,7 +67,7 @@ if __name__ == "__main__":
   data = load()
   data.num_nodes = data.features.shape[0]
   data.in_features = data.features.shape[1]
-  data.out_features = len(np.unique(data.labels))
+  data.out_features = data.labels.shape[1]
   data.lap_matrix = row_normalize(adj_to_lap_matrix(data.adj_matrix))
   data.lap2_matrix = np.multiply(data.lap_matrix, data.lap_matrix)
   # create model
@@ -100,10 +100,12 @@ if __name__ == "__main__":
     for iter in range(args.num_iterations):
       sample = random_sampling_train(args, model, data)
       value = sparse_mx_to_torch_sparse_tensor(sample.adjs[0])
-      sample.adjs = list(map(lambda adj: sparse_mx_to_torch_sparse_tensor(adj).to(device), sample.adjs))
       optimizer.zero_grad()
-      outputs = model.module(data.features[sample.input_nodes], sample.adjs)
-      loss = criterion(outputs, data.labels[sample.output_nodes])
+      output = model.module(
+        x= sparse_mx_to_torch_sparse_tensor(data.features[sample.input_nodes]),
+        adjs= list(map(lambda adj: sparse_mx_to_torch_sparse_tensor(adj).to(device), sample.adjs)),
+      )
+      loss = criterion(output[sample.output_nodes], data.labels[sample.output_nodes])
       loss.backward()
       torch.nn.utils.clip_grad_norm_(model.module.parameters(), 0.2)
       optimizer.step()
