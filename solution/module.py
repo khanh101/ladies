@@ -9,9 +9,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class Classifier(nn.Module):
+class GCNLinear(nn.Module):
   def __init__(self, encoder: nn.Module, in_features: int, out_features: int, dropout: float):
-    super(Classifier, self).__init__()
+    super(GCNLinear, self).__init__()
     self.encoder = encoder
     self.dropout = nn.Dropout(p= dropout)
     self.linear = nn.Linear(in_features= in_features, out_features= out_features, bias= True)
@@ -19,7 +19,7 @@ class Classifier(nn.Module):
     x = self.encoder(x= x, adjs= adjs)
     x = self.dropout(x)
     x = self.linear(x)
-    return F.log_softmax(x)
+    return x
 
 
 class GCN(nn.Module):

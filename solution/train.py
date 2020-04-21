@@ -10,11 +10,12 @@ import scipy as sp
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.optim as optim
 
-from module import GCN, Classifier
+from module import GCN, GCNLinear
 from load_data import load
 from sampler import full_sampler, ladies_sampler
-from utils import adj_to_lap_matrix, row_normalize
+from utils import adj_to_lap_matrix, row_normalize, sparse_mx_to_torch_sparse_tensor
 
 def random_sampling_train(args: SimpleNamespace, model: SimpleNamespace, data: SimpleNamespace) -> SimpleNamespace:
   batch_nodes = np.random.choice(data.train_nodes, size= args.batch_size)
@@ -22,10 +23,13 @@ def random_sampling_train(args: SimpleNamespace, model: SimpleNamespace, data: S
     batch_nodes= batch_nodes,
     samp_num_list= [args.batch_size for _ in range(args.num_layers)],
     num_nodes= data.num_nodes,
+    lap_matrix= data.lap_matrix,
     lap2_matrix= data.lap2_matrix,
     num_layers= args.num_layers,
   )
   return sample
+
+
 
 
 if __name__ == "__main__":
@@ -43,7 +47,7 @@ if __name__ == "__main__":
                       help='Number of iteration to run on a batch')
   parser.add_argument('--sampling_method', type=str, default='full',
                       help='Sampled Algorithms: full/ladies')
-  parser.add_argument('--cuda', type=int, default=0,
+  parser.add_argument('--cuda', type=int, default=-1,
                       help='Avaiable GPU ID')
   parser.add_argument('--num_processes', type=int, default= 1,
                     help='Number of Pool Processes')
@@ -53,36 +57,59 @@ if __name__ == "__main__":
                     help='Random Seed')
 
   args = parser.parse_args()
-  
+
+  # set up device
+  if args.cuda != -1:
+    device = torch.device("cuda:" + str(args.cuda))
+  else:
+    device = torch.device("cpu")
   # load data
   data = load()
   data.num_nodes = data.features.shape[0]
   data.in_features = data.features.shape[1]
   data.out_features = len(np.unique(data.labels))
-  data.lap_matrix = adj_to_lap_matrix(data.adj_matrix)
-  lap_norm_matrix = row_normalize(data.lap_matrix)
-  data.lap2_matrix = np.multiply(lap_norm_matrix, lap_norm_matrix)
+  data.lap_matrix = row_normalize(adj_to_lap_matrix(data.adj_matrix))
+  data.lap2_matrix = np.multiply(data.lap_matrix, data.lap_matrix)
   # create model
   model: SimpleNamespace = SimpleNamespace()
-  model.pool = mp.Pool(processes= args.num_processes)
-  model.cuda = args.cuda
+  #model.pool = mp.Pool(processes= args.num_processes)
   model.sampler = full_sampler
   if args.sampling_method == "ladies":
     model.sampler = ladies_sampler
-  encoder = GCN(
-    in_features= data.in_features,
-    hidden_features= args.hidden_features,
-    out_features= args.hidden_features,
-    num_layers= args.num_layers,
-    dropout= args.dropout
-  )
-  model.module = Classifier(
-    encoder= encoder,
+  model.module = GCNLinear(
+    encoder= GCN(
+      in_features= data.in_features,
+      hidden_features= args.hidden_features,
+      out_features= args.hidden_features,
+      num_layers= args.num_layers,
+      dropout= args.dropout
+    ),
     in_features= args.hidden_features,
     out_features= data.out_features,
     dropout= args.dropout,
   )
 
-  sample = random_sampling_train(args, model, data)
+  model.module.to(device)
+  # train
+  optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.module.parameters()))
+  criterion = nn.CrossEntropyLoss()
+  losses = []
+  for epoch in range(args.num_epochs):
+    # train
+    model.module.train()
+    for iter in range(args.num_iterations):
+      sample = random_sampling_train(args, model, data)
+      sample.adjs = map(lambda adj: sparse_mx_to_torch_sparse_tensor(adj).to(device), sample.adjs)
+      optimizer.zero_grad()
+      outputs = model.module(data.features[sample.input_nodes], sample.adjs)
+      loss = criterion(outputs, data.labels[sample.output_nodes])
+      loss.backward()
+      torch.nn.utils.clip_grad_norm_(model.module.parameters(), 0.2)
+      optimizer.step()
+      losses.append(loss.detach().tolist())
+      del loss
+    # eval
+    model.module.eval()
+
 
   pdb.set_trace()
