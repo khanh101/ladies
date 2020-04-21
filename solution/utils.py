@@ -20,14 +20,13 @@ def row_normalize(mx):
     mx = r_mat_inv.dot(mx)
     return mx
 
-def sparse_mx_to_torch_sparse_tensor(sparse_mx: sparse.csr_matrix) -> Tuple[torch.Tensor, torch.Tensor, torch.Size]:
+def sparse_mx_to_torch_sparse_tensor(sparse_mx: sparse.csr_matrix) -> torch.FloatTensor:
     """Convert a scipy sparse matrix to a torch sparse tensor."""
-    sparse_mx: np.ndarray = sparse_mx.tocoo().astype(np.float32)
+    sparse_mx = sparse_mx.tocoo().astype(np.float32)
     if len(sparse_mx.row) == 0 and len(sparse_mx.col) == 0:
         indices = torch.LongTensor([[], []])
     else:
-        indices = torch.from_numpy(
-            np.vstack((sparse_mx.row, sparse_mx.col)).astype(np.int64))
+        indices = torch.from_numpy(np.vstack((sparse_mx.row, sparse_mx.col)).astype(np.int64))
     values = torch.from_numpy(sparse_mx.data)
     shape = torch.Size(sparse_mx.shape)
-    return indices, values, shape
+    return torch.sparse.FloatTensor(indices, values, shape)

@@ -99,7 +99,8 @@ if __name__ == "__main__":
     model.module.train()
     for iter in range(args.num_iterations):
       sample = random_sampling_train(args, model, data)
-      sample.adjs = map(lambda adj: sparse_mx_to_torch_sparse_tensor(adj).to(device), sample.adjs)
+      value = sparse_mx_to_torch_sparse_tensor(sample.adjs[0])
+      sample.adjs = list(map(lambda adj: sparse_mx_to_torch_sparse_tensor(adj).to(device), sample.adjs))
       optimizer.zero_grad()
       outputs = model.module(data.features[sample.input_nodes], sample.adjs)
       loss = criterion(outputs, data.labels[sample.output_nodes])
