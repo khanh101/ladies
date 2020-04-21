@@ -53,13 +53,14 @@ def ladies_sampler(batch_nodes: np.ndarray, samp_num_list: np.ndarray, num_nodes
 
         adj_cut = lap_matrix[previous_nodes, :][:, after_nodes]
         adj_cut = adj_cut.multiply(1/p[after_nodes])
-
         adj_cut = row_normalize(adj_cut)
 
         adj = np.zeros(lap_matrix.shape)
         adj[previous_nodes, :][:, after_nodes] = adj_cut.todense()
         adj = sparse.csr_matrix(adj)
-        print(adj.shape)
+
+        print(f"{adj_cut.shape} -> {adj.shape}")
+
         adjs.append(adj)
         #     Turn the sampled nodes as previous_nodes, recursively conduct sampling.
         previous_nodes = after_nodes
