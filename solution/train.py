@@ -29,7 +29,8 @@ def random_sampling_train(args: SimpleNamespace, model: SimpleNamespace, data: S
   )
   return sample
 
-
+def onehot_to_labels(onehot: np.ndarray) -> np.ndarray:
+  return np.array([np.where(row==1)[0][0] for row in onehot])
 
 
 if __name__ == "__main__":
@@ -43,7 +44,7 @@ if __name__ == "__main__":
                       help='size of output node in a batch')
   parser.add_argument('--num_layers', type=int, default=5,
                       help='Number of GCN layers')
-  parser.add_argument('--num_iterations', type=int, default=2,
+  parser.add_argument('--num_iterations', type=int, default=100,
                       help='Number of iteration to run on a batch')
   parser.add_argument('--sampling_method', type=str, default='full',
                       help='Sampled Algorithms: full/ladies')
@@ -98,6 +99,7 @@ if __name__ == "__main__":
     # train
     model.module.train()
     for iter in range(args.num_iterations):
+      print(f"Epoch {epoch} Iteration {iter}", flush= True)
       sample = random_sampling_train(args, model, data)
       value = sparse_mx_to_torch_sparse_tensor(sample.adjs[0])
       optimizer.zero_grad()
@@ -105,7 +107,9 @@ if __name__ == "__main__":
         x= sparse_mx_to_torch_sparse_tensor(data.features[sample.input_nodes]),
         adjs= list(map(lambda adj: sparse_mx_to_torch_sparse_tensor(adj).to(device), sample.adjs)),
       )
-      loss = criterion(output[sample.output_nodes], data.labels[sample.output_nodes])
+      loss = criterion(
+        output[sample.output_nodes],
+        torch.from_numpy(onehot_to_labels(data.labels[sample.output_nodes])).long())
       loss.backward()
       torch.nn.utils.clip_grad_norm_(model.module.parameters(), 0.2)
       optimizer.step()
