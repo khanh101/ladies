@@ -87,7 +87,6 @@ if __name__ == "__main__":
   data.out_features = len(np.unique(data.labels))
   data.lap_matrix = row_normalize(adj_to_lap_matrix(data.adj_matrix))
   data.lap2_matrix = np.multiply(data.lap_matrix, data.lap_matrix)
-  pdb.set_trace()
   # create pool
   pool = mp.Pool(processes= 1)
   # create model
