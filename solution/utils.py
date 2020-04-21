@@ -11,6 +11,15 @@ def adj_to_lap_matrix(adj_matrix: sparse.csr_matrix) -> sparse.csr_matrix:
     lap_matrix = adj_matrix + sparse.eye(adj_matrix.shape[0])
     return lap_matrix
 
+def sparse_fill(shape: np.ndarray, mx: sparse.csr_matrix, row: np.ndarray = None, col: np.ndarray= None) -> sparse.csr_matrix:
+    if row is None:
+        row = np.arange(shape[0])
+    if col is None:
+        col = np.arange(shape[1])
+    dense = np.zeros(shape)
+    dense[row, :][:, col] = mx.todense()
+    return sparse.csr_matrix(dense)
+
 def row_normalize(mx):
     rowsum = np.array(mx.sum(1))
     rowsum[rowsum == 0] = 1 # rowsum -> no need to divide

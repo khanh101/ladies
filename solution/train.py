@@ -15,7 +15,7 @@ import torch.optim as optim
 from module import GCN, GCNLinear
 from load_data import load
 from sampler import full_sampler, ladies_sampler
-from utils import adj_to_lap_matrix, row_normalize, sparse_mx_to_torch_sparse_tensor
+from utils import adj_to_lap_matrix, row_normalize, sparse_mx_to_torch_sparse_tensor, sparse_fill
 
 #np.seterr(all="raise")
 
@@ -116,7 +116,7 @@ if __name__ == "__main__":
       sample = random_sampling_train(args, model, data)
       optimizer.zero_grad()
       output = model.module(
-        x= sparse_mx_to_torch_sparse_tensor(data.features[sample.input_nodes]),
+        x= sparse_mx_to_torch_sparse_tensor(sparse_fill(shape= data.features.shape, mx= data.features[sample.input_nodes], row= sample.input_nodes)),
         adjs= list(map(lambda adj: sparse_mx_to_torch_sparse_tensor(adj).to(device), sample.adjs)),
       )
       loss = criterion(

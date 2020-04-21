@@ -5,7 +5,7 @@ import scipy.sparse as sparse
 import torch
 from types import SimpleNamespace
 from typing import Tuple, List
-from utils import row_normalize
+from utils import row_normalize, sparse_fill
 
 """
 def full_sampler(seed: int, batch_nodes: np.ndarray, samp_num_list: nd.ndarray, num_nodes: int, lap2_matrix: sp.sparse.spmatrix, num_layers: int) -> Tuple[List[torch.Tensor], np.ndarray, np.ndarray]:
@@ -51,15 +51,11 @@ def ladies_sampler(batch_nodes: np.ndarray, samp_num_list: np.ndarray, num_nodes
         #     row-select and col-select the lap_matrix (U), and then devided by the sampled probability for 
         #     unbiased-sampling. Finally, conduct row-normalization to avoid value explosion.      
 
-        adj_cut = lap_matrix[previous_nodes, :][:, after_nodes]
-        adj_cut = adj_cut.multiply(1/p[after_nodes])
-        adj_cut = row_normalize(adj_cut)
+        adj = lap_matrix[previous_nodes, :][:, after_nodes]
+        adj = adj.multiply(1/ p[after_nodes])
+        adj = row_normalize(adj)
 
-        adj = np.zeros(lap_matrix.shape)
-        adj[previous_nodes, :][:, after_nodes] = adj_cut.todense()
-        adj = sparse.csr_matrix(adj)
-
-        print(f"{adj_cut.shape} -> {adj.shape}")
+        adj = sparse_fill(lap_matrix.shape, adj, previous_nodes, after_nodes)
 
         adjs.append(adj)
         #     Turn the sampled nodes as previous_nodes, recursively conduct sampling.
