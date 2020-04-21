@@ -11,6 +11,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from sklearn.metrics import f1_score
 
 from module import GCN, GCNLinear
 from load_data import load
@@ -145,9 +146,15 @@ if __name__ == "__main__":
       output[sample.output_nodes],
       torch.from_numpy(onehot_to_labels(data.labels[sample.output_nodes])).long(),
     )
+    output = output.detach().cpu()
     loss = loss.detach().cpu()
+    f1 = f1_score(
+      output[sample.output_nodes].argmax(dim=1),
+      onehot_to_labels(data.labels[sample.output_nodes]),
+      average= "micro",
+    )
     losses.append(loss)
-    print(f"Epoch {epoch}: Loss {loss}", flush= True)
+    print(f"Epoch {epoch}: Loss {loss} F1 {f1}", flush= True)
 
   import matplotlib.pyplot as plt
   plt.plot(np.arange(len(losses)), losses)
