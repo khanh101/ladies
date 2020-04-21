@@ -14,7 +14,7 @@ import torch.nn.functional as F
 class GCN(nn.Module):
   def __init__(self, in_features: int, hidden_features: int, out_features: int, num_layers: int, dropout: float):
     super(GCN, self).__init__()
-    self.gcs: List[nn.Module] = []
+    self.gcs: nn.ModuleList = nn.ModuleList()
     self.gcs.append(GraphConvolution(in_features= in_features, out_features= hidden_features))
     self.dropout: float = dropout
     for i in range(num_layers-2):
@@ -26,6 +26,8 @@ class GCN(nn.Module):
       x = self.gcs[l](x, adjs[l])
       if l != len(self.gcs)-1:
         x = F.dropout(F.relu(x), p= self.dropout, training= self.training)
+      else: # no dropout and relu for the last layer
+        x = x
     return x
 
 

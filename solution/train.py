@@ -1,13 +1,22 @@
 #!/usr/bin/env python
 import pdb
 import argparse
+from typing import List
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from module import GCN
-from utils import load_data
+from load_data import load
 
+
+class Module(nn.Module):
+  def __init__(self, in_features: int, hidden_features: int, out_features: int, num_layers: int, dropout: float):
+    super(Module, self).__init__()
+    self.encoder = GCN(in_features= in_features, hidden_features= hidden_features, out_features= out_features, num_layers = num_layers, dropout= dropout)
+  def forward(self, x: torch.Tensor, adjs: List[torch.Tensor]) -> torch.Tensor:
+    return F.log_softmax(self.encoder(x= x, adjs= adjs))
 
 class Trainer(object):
   def __init__(self, module: nn.Module):
@@ -43,5 +52,6 @@ if __name__ == "__main__":
 
   gcn = GCN(in_features= 5, hidden_features= 5, out_features= 5, num_layers= 5, dropout= 0.5)
   # load data
-  edges, labels, feat_data, num_classes, train_nodes, valid_nodes, test_nodes = load_data('cora')
+  adj_matrix, train_nodes, valid_nodes, test_nodes, edges, labels, feat_data, num_classes = load()
+  m = Module(5, 5, 5, 3, 0.5)
   pdb.set_trace()
