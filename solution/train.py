@@ -3,7 +3,7 @@ import pdb
 import argparse
 from typing import List, Dict
 from types import SimpleNamespace
-#import multiprocessing as mp
+import multiprocessing as mp
 
 import numpy as np
 import scipy as sp
@@ -84,9 +84,10 @@ if __name__ == "__main__":
   data.out_features = data.labels.shape[1]
   data.lap_matrix = row_normalize(adj_to_lap_matrix(data.adj_matrix))
   data.lap2_matrix = np.multiply(data.lap_matrix, data.lap_matrix)
+  # create pool
+  pool = mp.Pool(processes= 1)
   # create model
   model: SimpleNamespace = SimpleNamespace()
-  #model.pool = mp.Pool(processes= args.num_processes)
   model.sampler = full_sampler
   if args.sampling_method == "ladies":
     model.sampler = ladies_sampler
@@ -107,13 +108,18 @@ if __name__ == "__main__":
   optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.module.parameters()), lr=1e-2)
   criterion = nn.CrossEntropyLoss()
   losses = []
+  next_sample_async = None
   for epoch in range(args.num_epochs):
     # train
     model.module.train() # train mode
     print(f"Epoch {epoch}: ", flush= True)
     for iter in range(args.num_iterations):
       print(f"\tIteration {iter}: ", end= "", flush= True)
-      sample = random_sampling_train(args, model, data)
+      if next_sample_async is None:
+        sample = random_sampling_train(args, model, data)
+      else:
+        sample = next_sample_async.get()
+      next_sample_async = pool.apply_async(random_sampling_train, args= (args, model, data))
       optimizer.zero_grad()
       output = model.module(
         x= sparse_mx_to_torch_sparse_tensor(sparse_fill(shape= data.features.shape, mx= data.features[sample.input_nodes], row= sample.input_nodes)),
