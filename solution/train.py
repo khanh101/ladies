@@ -126,8 +126,8 @@ if __name__ == "__main__":
       loss.backward()
       torch.nn.utils.clip_grad_norm_(model.module.parameters(), 0.2)
       optimizer.step()
-      print(f"Loss {loss.detach().cpu()}", flush= True)
-      del loss
+      loss = loss.detach().cpu()
+      print(f"Loss {loss}", flush= True)
     # eval
     model.module.eval() # eval mode
     sample = sampling_valid(args, model, data)
@@ -138,7 +138,8 @@ if __name__ == "__main__":
     loss = criterion(
       output[sample.output_nodes],
       torch.from_numpy(onehot_to_labels(data.labels[sample.output_nodes])).long(),
-    ).detach().cpu()
+    )
+    loss = loss.detach().cpu()
     losses.append(loss)
     print(f"Epoch {epoch}: Loss {loss}", flush= True)
 
