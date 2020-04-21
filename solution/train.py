@@ -1,33 +1,16 @@
 #!/usr/bin/env python
 import pdb
 import argparse
-from typing import List
+from typing import List, Dict
+from types import SimpleNamespace
+import multiprocessing as mp
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from module import GCN
+from module import GCN, Classifier
 from load_data import load
-
-
-class Classifier(nn.Module):
-  def __init__(self, encoder: nn.Module, in_features: int, out_features: int, dropout: float):
-    super(Classifier, self).__init__()
-    self.encoder = encoder
-    self.dropout = nn.Dropout(p= dropout)
-    self.linear = nn.Linear(in_features= in_features, out_features= out_features, bias= True)
-  def forward(self, x: torch.Tensor, adjs: List[torch.Tensor]) -> torch.Tensor:
-    x = self.encoder(x= x, adjs= adjs)
-    x = self.dropout(x)
-    x = self.linear(x)
-    return F.log_softmax(x)
-
-class Trainer(object):
-  def __init__(self, module: nn.Module):
-    pass
-  def train(x):
-    pass
 
 
 
@@ -52,11 +35,23 @@ if __name__ == "__main__":
                       help='Sampled Algorithms: default/ladies')
   parser.add_argument('--cuda', type=int, default=0,
                       help='Avaiable GPU ID')
+  parser.add_argument('--pool_num', type=int, default= 1,
+                    help='Number of Pool Processes')
 
   args = parser.parse_args()
-
-  gcn = GCN(in_features= 5, hidden_features= 5, out_features= 5, num_layers= 5, dropout= 0.5)
+  print(args)
   # load data
   adj_matrix, train_nodes, valid_nodes, test_nodes, edges, labels, feat_data, num_classes = load()
-  m = Module(5, 5, 5, 3, 0.5)
+
+  model: SimpleNamespace = SimpleNamespace()
+  model.pool = mp.Pool(processes= args.pool_num)
+
+  print(add(3))
+  model.add = add
+  value = model.pool.apply_async(model.add, args=(3,))
+
+  print(value.get()) 
+  
   pdb.set_trace()
+def add(x):
+    return x+1
