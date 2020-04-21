@@ -1,7 +1,9 @@
 
 import numpy as np
-import scipy
-from typing import Tuple
+import scipy as sp
+import torch
+from types import SimpleNamespace
+from typing import Tuple, List
 from utils import sparse_mx_to_torch_sparse_tensor, row_normalize
 
 """
@@ -15,7 +17,7 @@ def default_sampler(seed: int, batch_nodes: np.ndarray, samp_num_list: nd.ndarra
     mx = sparse_mx_to_torch_sparse_tensor(lap_matrix)
     return [mx for i in range(depth)], np.arange(num_nodes), batch_nodes
 
-def ladies_sampler(seed: int, batch_nodes: np.ndarray, samp_num_list: nd.ndarray, num_nodes: int, lap_matrix: sp.sparse.spmatrix, depth: int) -> Tuple[List[torch.Tensor], np.ndarray, np.ndarray]:
+def ladies_sampler(seed: int, batch_nodes: np.ndarray, samp_num_list: nd.ndarray, num_nodes: int, lap_matrix: sp.sparse.spmatrix, depth: int) -> SimpleNamespace[List[torch.Tensor], np.ndarray, np.ndarray]:
     '''
         LADIES_Sampler: Sample a fixed number of nodes per layer. The sampling probability (importance)
                          is computed adaptively according to the nodes sampled in the upper layer.
@@ -44,8 +46,6 @@ def ladies_sampler(seed: int, batch_nodes: np.ndarray, samp_num_list: nd.ndarray
         p = pi / np.sum(pi)
         s_num = np.min([np.sum(p > 0), samp_num_list[d]])
 
-
-
         #     sample the next layer's nodes based on the adaptively probability (p).
         after_nodes = np.random.choice(num_nodes, s_num, p = p, replace = False)
         #     Add output nodes for self-loop
@@ -58,7 +58,8 @@ def ladies_sampler(seed: int, batch_nodes: np.ndarray, samp_num_list: nd.ndarray
         previous_nodes = after_nodes
     #     Reverse the sampled probability from bottom to top. Only require input how the lastly sampled nodes.
     adjs.reverse()
-    return adjs, previous_nodes, batch_nodes
 
+    sampling = SimpleNamespace(adjs= adjs, previous_nodes= previous_nodes, batch_nodes= batch_nodes)
+    return sampling
 if __name__ == "__main__":
   pass
