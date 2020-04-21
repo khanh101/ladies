@@ -57,20 +57,20 @@ if __name__ == "__main__":
                       help='Hidden layer dimension')
   parser.add_argument('--num_epochs', type=int, default= 100,
                       help='Number of Epoch')
-  parser.add_argument('--batch_size', type=int, default=-1,
+  parser.add_argument('--batch_size', type=int, default=64,
                       help='size of output node in a batch')
   parser.add_argument('--num_layers', type=int, default=5,
                       help='Number of GCN layers')
-  parser.add_argument('--num_iterations', type=int, default=1,
+  parser.add_argument('--num_iterations', type=int, default=200,
                       help='Number of iteration to run on a batch')
   parser.add_argument('--sampling_method', type=str, default='full',
                       help='Sampled Algorithms: full/ladies')
   parser.add_argument('--cuda', type=int, default=-1,
                       help='Avaiable GPU ID')
-  #parser.add_argument('--num_processes', type=int, default= 1,
-  #                  help='Number of Pool Processes')
   parser.add_argument('--dropout', type=float, default= 0.5,
                     help='Dropout probability')
+  parser.add_argument('--learning_rate', type=float, default= 1e-3,
+                    help='Learning rate')
   #parser.add_argument('--seed', type=int, 
   #                  help='Random Seed')
 
@@ -109,7 +109,7 @@ if __name__ == "__main__":
   )
 
   model.module.to(device)
-  optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.module.parameters()), lr=1e-2)
+  optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.module.parameters()), lr=args.learning_rate)
   criterion = nn.CrossEntropyLoss()
   losses = []
   next_sample_async = None
