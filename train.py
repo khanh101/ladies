@@ -16,7 +16,7 @@ from sklearn.metrics import f1_score
 from torchviz import make_dot
 
 from module import GCN, GCNLinear
-from load_data import load_random_block, load_citeseer
+from load_data import load_random_block
 from sampler import full_sampler, ladies_sampler
 from utils import adj_to_lap_matrix, row_normalize, sparse_mx_to_torch_sparse_tensor, sparse_fill
 

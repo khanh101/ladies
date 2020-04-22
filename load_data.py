@@ -5,7 +5,7 @@ from typing import List
 import networkx as nx
 import scipy.sparse as sparse
 
-def load_random_block(cluster_size: List[int] = [5, 5], prob_matrix: List[List[float]] = [[1, 0],[0, 1]]) -> SimpleNameSpace:
+def load_random_block(cluster_size: List[int] = [5, 5], prob_matrix: List[List[float]] = [[1, 0],[0, 1]]) -> SimpleNamespace:
     net = nx.generators.community.stochastic_block_model(cluster_size, prob_matrix)
     adj_matrix = nx.adjacency_matrix(net)
     num_nodes = sum(cluster_size)
