@@ -1,3 +1,4 @@
+import pdb
 import numpy as np
 from types import SimpleNamespace
 from typing import List
@@ -29,8 +30,8 @@ def load(cluster_size: List[int] = [5, 5], prob_matrix: List[List[float]] = [[1,
     idx_test = idx[int(0.9 * len(idx)):]
 
     labels = np.array(list(map(lambda node: net.nodes[node]["block"], net.nodes)))
-    features = sparse.csr_matrix(np.zeros(shape = (num_nodes, 1)))
-
+    features = sparse.csr_matrix(sparse.eye(num_nodes))
+    
     data = SimpleNamespace(
         adj_matrix= adj_matrix,
         train_nodes= idx_train,
