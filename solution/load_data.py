@@ -84,5 +84,19 @@ def load():
 
     return data
 if __name__ == "__main__":
+    data = load()
+    num_nodes = data.adj_matrix.shape[0]
+    import networkx as nx
+    import matplotlib.pyplot as plt
+    net = nx.from_numpy_matrix(data.adj_matrix.todense())
+    color = ["#FF0000", "F0F000", "00FF00", "00F0F0", "0000FF", "F000F0"]
+    for i in range(6):
+        nx.draw(net, node_size= 10, 
+        node_list = filter(lambda node: data.labels[node] == i, range(num_nodes)),
+        node_color= color[i],
+    )
+    plt.show()
+
+
     import pdb
     pdb.set_trace()
