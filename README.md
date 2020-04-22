@@ -1,1 +1,3 @@
-# CZ4071_Network_Science_Assignment_2
+# OVERVIEW
+
+Code for NeurIPS'19 "Layer-Dependent Importance Sampling for Training Deep and Large Graph Convolutional Networks" 

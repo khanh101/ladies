@@ -71,8 +71,6 @@ if __name__ == "__main__":
                     help='Dropout probability')
   parser.add_argument('--learning_rate', type=float, default= 1e-3,
                     help='Learning rate')
-  parser.add_argument('--dataset', type=str, default= "random_block",
-                    help='Dataset: random_block/citeseer')
   parser.add_argument('--num_nodes', type=int, default=100,
                       help='Number of nodes in random block model')
   #parser.add_argument('--seed', type=int, 
@@ -86,18 +84,14 @@ if __name__ == "__main__":
   else:
     device = torch.device("cpu")
   # load data
-  data = None
-  if args.dataset == "citeseer":
-    data = load_citeseer()
-  else:
-    all = args.num_nodes
-    half = int(all/2)
-    p1 = np.log(all) / all
-    p2 = p1 / all
-    data = load_random_block(
-      [half, all-half],
-      [[p1, p2], [p2, p1]],
-    )
+  all = args.num_nodes
+  half = int(all/2)
+  p1 = np.log(all) / all
+  p2 = p1 / all
+  data = load_random_block(
+    [half, all-half],
+    [[p1, p2], [p2, p1]],
+  )
   data.num_nodes = data.features.shape[0]
   data.in_features = data.features.shape[1]
   data.out_features = len(np.unique(data.labels))
