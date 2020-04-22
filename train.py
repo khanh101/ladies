@@ -125,8 +125,9 @@ if __name__ == "__main__":
   sample = None
 
   #START TRAINING
-  t0 = time.time()
+  start = time.time()
   for epoch in range(args.num_epochs):
+    start_epoch = time.time()
     # train
     model.module.train() # train mode
     print(f"Epoch {epoch}: ", flush= True)
@@ -179,10 +180,11 @@ if __name__ == "__main__":
       average= "micro",
     )
     losses.append(loss)
-    print(f"Epoch {epoch}: Loss {loss} F1 {f1}", flush= True)
+    end_epoch = time.time()
+    print(f"Epoch {epoch}: Loss {loss} F1 {f1} Time {end_epoch - start_epoch} s", flush= True)
 
-  t1 = time.time()
-  print(f"Elapsed time: {t1-t0} s")
+  end = time.time()
+  print(f"Elapsed time: {end-start} s")
 
   import matplotlib.pyplot as plt
   plt.plot(np.arange(len(losses)), losses)
