@@ -63,8 +63,6 @@ if __name__ == "__main__":
                       help='size of output node in a batch')
   parser.add_argument('--num_layers', type=int, default=5,
                       help='Number of GCN layers')
-  parser.add_argument('--num_iterations', type=int, default=10,
-                      help='Number of iteration to run on a batch')
   parser.add_argument('--sampling_method', type=str, default='full',
                       help='Sampled Algorithms: full/ladies')
   parser.add_argument('--cuda', type=int, default=-1,
@@ -144,7 +142,8 @@ if __name__ == "__main__":
     # train
     model.module.train() # train mode
     print(f"Epoch {epoch}: ", flush= True)
-    for iter in range(args.num_iterations):
+    num_iterations = int(data.num_nodes / args.batch_size)
+    for iter in range(num_iterations):
       print(f"\tIteration {iter}: ", end= "", flush= True)
       if next_sample_async is None:
         sample = random_sampling_train(args, model, data)
@@ -167,9 +166,9 @@ if __name__ == "__main__":
       optimizer.step()
 
 
-      if epoch == 0 and iter == 0:
-        dot = make_dot(loss.mean(), params= dict(model.module.named_parameters()))
-        dot.render("test.gv", view= True)
+      #if epoch == 0 and iter == 0:
+      #  dot = make_dot(loss.mean(), params= dict(model.module.named_parameters()))
+      #  dot.render("test.gv", view= True)
 
       loss = loss.detach().cpu()
       print(f"Loss {loss}", flush= True)
@@ -221,5 +220,3 @@ if __name__ == "__main__":
   axs[1][1].set_ylabel("F1")
 
   plt.show()
-
-  pdb.set_trace()
