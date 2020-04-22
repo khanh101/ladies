@@ -45,6 +45,7 @@ class GCN(nn.Module):
         x = F.dropout(F.relu(x), p= self.dropout, training= self.training)
       else: # no dropout and relu for the last layer
         x = x
+    return x
     return F.log_softmax(x, dim= 0)
 
 
