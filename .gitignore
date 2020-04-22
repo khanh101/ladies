@@ -130,5 +130,5 @@ dmypy.json
 .vscode/settings.json
 
 # Others
-*.pv
+*.gv
 *.pdf
