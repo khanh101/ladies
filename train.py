@@ -4,6 +4,7 @@ import argparse
 from typing import List, Dict
 from types import SimpleNamespace
 import multiprocessing as mp
+import time
 
 import numpy as np
 import scipy as sp
@@ -18,6 +19,7 @@ from module import GCN, GCNLinear
 from load_data import load_random_block, load_citeseer
 from sampler import full_sampler, ladies_sampler
 from utils import adj_to_lap_matrix, row_normalize, sparse_mx_to_torch_sparse_tensor, sparse_fill
+
 
 #np.seterr(all="raise")
 
@@ -84,8 +86,11 @@ if __name__ == "__main__":
   else:
     device = torch.device("cpu")
   # load data
-  data = load_random_block([100,100], [[0.1, 0.0001], [0.0001, 0.1]])
-  #data = load_citeseer()
+  data = None
+  if args.dataset == "citeseer":
+    data = load_citeseer()
+  else:
+    data = load_random_block([100,100], [[0.1, 0.0001], [0.0001, 0.1]])
   data.num_nodes = data.features.shape[0]
   data.in_features = data.features.shape[1]
   data.out_features = len(np.unique(data.labels))
@@ -118,6 +123,9 @@ if __name__ == "__main__":
   losses = []
   next_sample_async = None
   sample = None
+
+  #START TRAINING
+  t0 = time.time()
   for epoch in range(args.num_epochs):
     # train
     model.module.train() # train mode
@@ -172,6 +180,9 @@ if __name__ == "__main__":
     )
     losses.append(loss)
     print(f"Epoch {epoch}: Loss {loss} F1 {f1}", flush= True)
+
+  t1 = time.time()
+  print(f"Elapsed time: {t1-t0} s")
 
   import matplotlib.pyplot as plt
   plt.plot(np.arange(len(losses)), losses)
