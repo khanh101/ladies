@@ -26,6 +26,7 @@ def sparse_fill(shape: np.ndarray, mx: sparse.csr_matrix, row: np.ndarray = None
     return sparse.csr_matrix(dense)
     """
     lil = sparse.lil_matrix(mx.shape)
+    mx = mx.toarray()
     for r, rr in enumerate(row):
         for c, cc in enumerate(col):
             lil[rr, cc] = mx[r, c]

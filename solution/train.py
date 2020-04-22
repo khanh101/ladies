@@ -53,11 +53,11 @@ def sampling_valid(args: SimpleNamespace, model: SimpleNamespace, data: SimpleNa
 if __name__ == "__main__":
   # load args
   parser = argparse.ArgumentParser(description='Training GCN')
-  parser.add_argument('--hidden_features', type=int, default=256,
+  parser.add_argument('--hidden_features', type=int, default=64,
                       help='Hidden layer dimension')
   parser.add_argument('--num_epochs', type=int, default= 10,
                       help='Number of Epoch')
-  parser.add_argument('--batch_size', type=int, default=512,
+  parser.add_argument('--batch_size', type=int, default=64,
                       help='size of output node in a batch')
   parser.add_argument('--num_layers', type=int, default=5,
                       help='Number of GCN layers')
