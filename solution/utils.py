@@ -17,12 +17,19 @@ def sparse_fill(shape: np.ndarray, mx: sparse.csr_matrix, row: np.ndarray = None
         row = np.arange(shape[0])
     if col is None:
         col = np.arange(shape[1])
+    """
     dense = np.zeros(shape)
     mxdense = mx.toarray()
     for r, rr in enumerate(row):
         for c, cc in enumerate(col):
             dense[rr][cc] = mxdense[r][c]
     return sparse.csr_matrix(dense)
+    """
+    lil = sparse.lil_matrix(mx.shape)
+    for r, rr in enumerate(row):
+        for c, cc in enumerate(col):
+            lil[rr, cc] = mx[r, c]
+    return sparse.csr_matrix(lil)
 
 def row_normalize(mx):
     rowsum = np.array(mx.sum(1))
