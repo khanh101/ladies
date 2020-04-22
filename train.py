@@ -75,6 +75,8 @@ if __name__ == "__main__":
                     help='Learning rate')
   parser.add_argument('--dataset', type=str, default= "random_block",
                     help='Dataset: random_block/citeseer')
+  parser.add_argument('--num_nodes', type=int, default=100,
+                      help='Number of nodes in random block model')
   #parser.add_argument('--seed', type=int, 
   #                  help='Random Seed')
 
@@ -90,7 +92,14 @@ if __name__ == "__main__":
   if args.dataset == "citeseer":
     data = load_citeseer()
   else:
-    data = load_random_block([100,100], [[0.1, 0.0001], [0.0001, 0.1]])
+    all = args.num_nodes
+    half = int(all/2)
+    p1 = np.log(all) / all
+    p2 = p1 / all
+    data = load_random_block(
+      [half, all-half],
+      [[p1, p2], [p2, p1]],
+    )
   data.num_nodes = data.features.shape[0]
   data.in_features = data.features.shape[1]
   data.out_features = len(np.unique(data.labels))
@@ -120,14 +129,15 @@ if __name__ == "__main__":
   model.module.to(device)
   optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.module.parameters()), lr=args.learning_rate)
   criterion = nn.CrossEntropyLoss()
+  times = []
   losses = []
+  f1s = []
   next_sample_async = None
   sample = None
 
   #START TRAINING
   start = time.time()
   for epoch in range(args.num_epochs):
-    start_epoch = time.time()
     # train
     model.module.train() # train mode
     print(f"Epoch {epoch}: ", flush= True)
@@ -179,14 +189,17 @@ if __name__ == "__main__":
       data.labels[sample.output_nodes],
       average= "micro",
     )
+    times.append(time.time())
     losses.append(loss)
-    end_epoch = time.time()
-    print(f"Epoch {epoch}: Loss {loss} F1 {f1} Time {end_epoch - start_epoch} s", flush= True)
+    f1s.append(f1)
+    print(f"Epoch {epoch}: Loss {loss} F1 {f1}", flush= True)
 
   end = time.time()
   print(f"Elapsed time: {end-start} s")
 
   import matplotlib.pyplot as plt
-  plt.plot(np.arange(len(losses)), losses)
+  plt.plot(np.arange(len(f1s)), f1s)
+  plt.show()
+  plt.plot(times, f1s)
   plt.show()
   pdb.set_trace()
