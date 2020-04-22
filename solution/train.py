@@ -133,6 +133,7 @@ if __name__ == "__main__":
         output[sample.output_nodes],
         torch.from_numpy(data.labels[sample.output_nodes]).long(),
       )
+      pdb.set_trace()
       loss.backward()
       torch.nn.utils.clip_grad_norm_(model.module.parameters(), 0.2)
       optimizer.step()
