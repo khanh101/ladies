@@ -72,7 +72,6 @@ class GraphConvolution(nn.Module):
             self.bias.data.uniform_(-stdv, stdv)
 
     def forward(self, input: torch.Tensor, adj: torch.Tensor) -> torch.Tensor:
-        pdb.set_trace()
         support = torch.mm(input, self.weight)
         output = torch.spmm(adj, support)
         if self.bias is not None:

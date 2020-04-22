@@ -127,7 +127,7 @@ if __name__ == "__main__":
         sample = next_sample_async.get()
       next_sample_async = pool.apply_async(random_sampling_train, args= (args, model, data))
       optimizer.zero_grad()
-      pdb.set_trace()
+      
       output = model.module(
         x= sparse_mx_to_torch_sparse_tensor(sparse_fill(shape= data.features.shape, mx= data.features[sample.input_nodes], row= sample.input_nodes)),
         adjs= list(map(lambda adj: sparse_mx_to_torch_sparse_tensor(adj).to(device), sample.adjs)),
