@@ -47,7 +47,7 @@ if __name__ == "__main__":
     num_nodes = data.adj_matrix.shape[0]
     import networkx as nx
     import matplotlib.pyplot as plt
-    net = nx.from_numpy_matrix(data.adj_matrix.todense())
+    net = nx.from_numpy_array(data.adj_matrix.toarray())
     nx.draw(net, node_size= 10)
     plt.show()
 

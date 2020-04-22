@@ -1,3 +1,4 @@
+import pdb
 from typing import Tuple
 
 import torch
@@ -17,7 +18,10 @@ def sparse_fill(shape: np.ndarray, mx: sparse.csr_matrix, row: np.ndarray = None
     if col is None:
         col = np.arange(shape[1])
     dense = np.zeros(shape)
-    dense[row, :][:, col] = mx.todense()
+    mxdense = mx.toarray()
+    for r, rr in enumerate(row):
+        for c, cc in enumerate(col):
+            dense[rr][cc] = mxdense[r][c]
     return sparse.csr_matrix(dense)
 
 def row_normalize(mx):
