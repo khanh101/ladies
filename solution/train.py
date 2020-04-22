@@ -71,6 +71,8 @@ if __name__ == "__main__":
                     help='Dropout probability')
   parser.add_argument('--learning_rate', type=float, default= 1e-3,
                     help='Learning rate')
+  parser.add_argument('--dataset', type=str, default= "random_block",
+                    help='Dataset: random_block/citeseer')
   #parser.add_argument('--seed', type=int, 
   #                  help='Random Seed')
 
