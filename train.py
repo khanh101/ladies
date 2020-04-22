@@ -132,64 +132,67 @@ if __name__ == "__main__":
 
   #START TRAINING
   start = time.time()
-  for epoch in range(args.num_epochs):
-    # train
-    model.module.train() # train mode
-    print(f"Epoch {epoch}: ", flush= True)
-    num_iterations = int(data.num_nodes / args.batch_size)
-    for iter in range(num_iterations):
-      print(f"\tIteration {iter}: ", end= "", flush= True)
-      if next_sample_async is None:
-        sample = random_sampling_train(args, model, data)
-      else:
-        sample = next_sample_async.get()
-      next_sample_async = pool.apply_async(random_sampling_train, args= (args, model, data))
-      optimizer.zero_grad()
-      
+  try:
+    for epoch in range(args.num_epochs):
+      # train
+      model.module.train() # train mode
+      print(f"Epoch {epoch}: ", flush= True)
+      num_iterations = int(data.num_nodes / args.batch_size)
+      for iter in range(num_iterations):
+        print(f"\tIteration {iter}: ", end= "", flush= True)
+        if next_sample_async is None:
+          sample = random_sampling_train(args, model, data)
+        else:
+          sample = next_sample_async.get()
+        next_sample_async = pool.apply_async(random_sampling_train, args= (args, model, data))
+        optimizer.zero_grad()
+        
+        output = model.module(
+          x= sparse_mx_to_torch_sparse_tensor(sparse_fill(shape= data.features.shape, mx= data.features[sample.input_nodes], row= sample.input_nodes)),
+          adjs= list(map(lambda adj: sparse_mx_to_torch_sparse_tensor(adj).to(device), sample.adjs)),
+        )
+
+        loss = criterion(
+          output[sample.output_nodes],
+          torch.from_numpy(data.labels[sample.output_nodes]).long(),
+        )
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.module.parameters(), 0.2)
+        optimizer.step()
+
+
+        #if epoch == 0 and iter == 0:
+        #  dot = make_dot(loss.mean(), params= dict(model.module.named_parameters()))
+        #  dot.render("test.gv", view= True)
+
+        loss = loss.detach().cpu()
+        print(f"Loss {loss}", flush= True)
+      # eval
+      model.module.eval() # eval mode
+      sample = sampling_valid(args, model, data)
       output = model.module(
-        x= sparse_mx_to_torch_sparse_tensor(sparse_fill(shape= data.features.shape, mx= data.features[sample.input_nodes], row= sample.input_nodes)),
+        x= sparse_mx_to_torch_sparse_tensor(data.features[sample.input_nodes]),
         adjs= list(map(lambda adj: sparse_mx_to_torch_sparse_tensor(adj).to(device), sample.adjs)),
       )
-
       loss = criterion(
         output[sample.output_nodes],
         torch.from_numpy(data.labels[sample.output_nodes]).long(),
       )
-      loss.backward()
-      torch.nn.utils.clip_grad_norm_(model.module.parameters(), 0.2)
-      optimizer.step()
-
-
-      #if epoch == 0 and iter == 0:
-      #  dot = make_dot(loss.mean(), params= dict(model.module.named_parameters()))
-      #  dot.render("test.gv", view= True)
-
+      
+      output = output.detach().cpu()
       loss = loss.detach().cpu()
-      print(f"Loss {loss}", flush= True)
-    # eval
-    model.module.eval() # eval mode
-    sample = sampling_valid(args, model, data)
-    output = model.module(
-      x= sparse_mx_to_torch_sparse_tensor(data.features[sample.input_nodes]),
-      adjs= list(map(lambda adj: sparse_mx_to_torch_sparse_tensor(adj).to(device), sample.adjs)),
-    )
-    loss = criterion(
-      output[sample.output_nodes],
-      torch.from_numpy(data.labels[sample.output_nodes]).long(),
-    )
-    
-    output = output.detach().cpu()
-    loss = loss.detach().cpu()
-    f1 = f1_score(
-      output[sample.output_nodes].argmax(dim=1),
-      data.labels[sample.output_nodes],
-      average= "micro",
-    )
-    times.append(time.time() - start)
-    losses.append(loss)
-    f1s.append(f1)
-    print(f"Epoch {epoch}: Loss {loss} F1 {f1}", flush= True)
+      f1 = f1_score(
+        output[sample.output_nodes].argmax(dim=1),
+        data.labels[sample.output_nodes],
+        average= "micro",
+      )
+      times.append(time.time() - start)
+      losses.append(loss)
+      f1s.append(f1)
+      print(f"Epoch {epoch}: Loss {loss} F1 {f1}", flush= True)
 
+  except KeyboardInterrupt:
+    pass
   print(f"Elapsed Time: {time.time() - start}")
 
   import matplotlib.pyplot as plt
