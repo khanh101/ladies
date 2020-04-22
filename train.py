@@ -105,6 +105,9 @@ if __name__ == "__main__":
   data.out_features = len(np.unique(data.labels))
   data.lap_matrix = row_normalize(adj_to_lap_matrix(data.adj_matrix))
   data.lap2_matrix = data.lap_matrix.multiply(data.lap_matrix)
+
+  if args.sampling_method == "full":
+    args.batch_size = len(data.train_nodes)
   # create pool
   pool = mp.Pool(processes= 1)
   # create model
@@ -189,17 +192,34 @@ if __name__ == "__main__":
       data.labels[sample.output_nodes],
       average= "micro",
     )
-    times.append(time.time())
+    times.append(time.time() - start)
     losses.append(loss)
     f1s.append(f1)
     print(f"Epoch {epoch}: Loss {loss} F1 {f1}", flush= True)
 
-  end = time.time()
-  print(f"Elapsed time: {end-start} s")
+  print(f"Elapsed Time: {time.time() - start}")
 
   import matplotlib.pyplot as plt
-  plt.plot(np.arange(len(f1s)), f1s)
+  fig, axs = plt.subplots(nrows= 2, ncols= 2, constrained_layout=True)
+  fig.suptitle(f"Sampling method: {args.sampling_method}, Number of nodes {args.num_nodes}")
+  
+  axs[0][0].plot(np.arange(len(times)), losses)
+  axs[0][0].set_xlabel("Epoch")
+  axs[0][0].set_ylabel("Loss")
+
+  axs[0][1].plot(times, losses)
+  axs[0][1].set_xlabel("Time")
+  axs[0][1].set_ylabel("Loss")
+
+
+  axs[1][0].plot(np.arange(len(times)), f1s)
+  axs[1][0].set_xlabel("Epoch")
+  axs[1][0].set_ylabel("F1")
+
+  axs[1][1].plot(times, f1s)
+  axs[1][1].set_xlabel("Time")
+  axs[1][1].set_ylabel("F1")
+
   plt.show()
-  plt.plot(times, f1s)
-  plt.show()
+
   pdb.set_trace()
