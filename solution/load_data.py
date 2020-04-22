@@ -42,20 +42,20 @@ def load(cluster_size: List[int] = [100, 100], prob_matrix: List[List[float]] = 
 
     return data
 if __name__ == "__main__":
-    data = load()
+    data = load([5, 5], [[1, 0], [0, 1]])
     num_nodes = data.adj_matrix.shape[0]
     import networkx as nx
     import matplotlib.pyplot as plt
     net = nx.from_numpy_matrix(data.adj_matrix.todense())
-    """
     color = ("b", "g", "r", "c", "m", "y", "k",)
-    for i in range(6):
+
+    for i in range(len(np.unique(data.labels))):
         nx.draw(net, node_size= 10, 
-            node_list = filter(lambda node: data.labels[node] == i, range(num_nodes)),
+            #node_list = list(filter(lambda node: data.labels[node] == i, range(num_nodes))),
+            node_list = np.arange(num_nodes),
             node_color= color[i],
         )
         plt.show()
-    """
     nx.draw(net, node_size= 10)
     plt.show()
 

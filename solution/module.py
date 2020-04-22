@@ -29,6 +29,7 @@ class GCN(nn.Module):
     self.out_features: int = out_features
     self.gcs: nn.ModuleList = nn.ModuleList()
     self.dropout: float = dropout
+
     if num_layers >= 2:
       self.gcs.append(GraphConvolution(in_features= in_features, out_features= hidden_features))
       for i in range(num_layers-2):
@@ -44,7 +45,7 @@ class GCN(nn.Module):
         x = F.dropout(F.relu(x), p= self.dropout, training= self.training)
       else: # no dropout and relu for the last layer
         x = x
-    return x
+    return F.log_softmax(x, dim= 0)
 
 
 class GraphConvolution(nn.Module):

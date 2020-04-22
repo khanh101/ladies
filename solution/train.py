@@ -25,7 +25,7 @@ def random_sampling_train(args: SimpleNamespace, model: SimpleNamespace, data: S
     batch_nodes = data.train_nodes
   else:
     batch_nodes = np.random.choice(data.train_nodes, size= args.batch_size, replace= True)
-  sample = ladies_sampler(
+  sample = model.sampler(
     batch_nodes= batch_nodes,
     samp_num_list= [len(batch_nodes) for _ in range(args.num_layers)],
     num_nodes= data.num_nodes,
@@ -86,7 +86,7 @@ if __name__ == "__main__":
   data.in_features = data.features.shape[1]
   data.out_features = len(np.unique(data.labels))
   data.lap_matrix = row_normalize(adj_to_lap_matrix(data.adj_matrix))
-  data.lap2_matrix = np.multiply(data.lap_matrix, data.lap_matrix)
+  data.lap2_matrix = data.lap_matrix.multiply(data.lap_matrix)
   # create pool
   pool = mp.Pool(processes= 1)
   # create model
@@ -112,6 +112,7 @@ if __name__ == "__main__":
   criterion = nn.CrossEntropyLoss()
   losses = []
   next_sample_async = None
+  sample = None
   for epoch in range(args.num_epochs):
     # train
     model.module.train() # train mode
