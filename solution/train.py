@@ -60,7 +60,7 @@ if __name__ == "__main__":
                       help='size of output node in a batch')
   parser.add_argument('--num_layers', type=int, default=5,
                       help='Number of GCN layers')
-  parser.add_argument('--num_iterations', type=int, default=50,
+  parser.add_argument('--num_iterations', type=int, default=1,
                       help='Number of iteration to run on a batch')
   parser.add_argument('--sampling_method', type=str, default='full',
                       help='Sampled Algorithms: full/ladies')
@@ -133,7 +133,6 @@ if __name__ == "__main__":
         output[sample.output_nodes],
         torch.from_numpy(data.labels[sample.output_nodes]).long(),
       )
-      pdb.set_trace()
       loss.backward()
       torch.nn.utils.clip_grad_norm_(model.module.parameters(), 0.2)
       optimizer.step()
