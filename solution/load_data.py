@@ -18,7 +18,7 @@ def onehot_to_labels(onehot: np.ndarray) -> np.ndarray:
   return np.array(out)
   return np.array([np.where(row==1)[0][0] for row in onehot])
 
-def load(cluster_size: List[int] = [5, 5], prob_matrix: List[List[float]] = [[0.1, 0.001],[0.001, 0.1]]):
+def load(cluster_size: List[int] = [5, 5], prob_matrix: List[List[float]] = [[1, 0],[0, 1]]):
     net = nx.generators.community.stochastic_block_model(cluster_size, prob_matrix)
     adj_matrix = nx.adjacency_matrix(net)
     num_nodes = sum(cluster_size)
@@ -42,7 +42,7 @@ def load(cluster_size: List[int] = [5, 5], prob_matrix: List[List[float]] = [[0.
 
     return data
 if __name__ == "__main__":
-    data = load([5, 5], [[1, 0], [0, 1]])
+    data = load()
     num_nodes = data.adj_matrix.shape[0]
     import networkx as nx
     import matplotlib.pyplot as plt
