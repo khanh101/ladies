@@ -15,7 +15,7 @@ from sklearn.metrics import f1_score
 from torchviz import make_dot
 
 from module import GCN, GCNLinear
-from load_data import load
+from load_data import load_random_block, load_citeseer
 from sampler import full_sampler, ladies_sampler
 from utils import adj_to_lap_matrix, row_normalize, sparse_mx_to_torch_sparse_tensor, sparse_fill
 
@@ -82,7 +82,8 @@ if __name__ == "__main__":
   else:
     device = torch.device("cpu")
   # load data
-  data = load()
+  data = load_random_block([100,100], [[0.1, 0.0001], [0.0001, 0.1]])
+  #data = load_citeseer()
   data.num_nodes = data.features.shape[0]
   data.in_features = data.features.shape[1]
   data.out_features = len(np.unique(data.labels))
