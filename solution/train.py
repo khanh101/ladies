@@ -12,6 +12,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from sklearn.metrics import f1_score
+from torchviz import make_dot
 
 from module import GCN, GCNLinear
 from load_data import load
@@ -54,13 +55,13 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Training GCN')
   parser.add_argument('--hidden_features', type=int, default=256,
                       help='Hidden layer dimension')
-  parser.add_argument('--num_epochs', type=int, default= 100,
+  parser.add_argument('--num_epochs', type=int, default= 10,
                       help='Number of Epoch')
   parser.add_argument('--batch_size', type=int, default=512,
                       help='size of output node in a batch')
   parser.add_argument('--num_layers', type=int, default=5,
                       help='Number of GCN layers')
-  parser.add_argument('--num_iterations', type=int, default=1,
+  parser.add_argument('--num_iterations', type=int, default=10,
                       help='Number of iteration to run on a batch')
   parser.add_argument('--sampling_method', type=str, default='full',
                       help='Sampled Algorithms: full/ladies')
@@ -107,6 +108,7 @@ if __name__ == "__main__":
     dropout= args.dropout,
   )
 
+
   model.module.to(device)
   optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.module.parameters()), lr=args.learning_rate)
   criterion = nn.CrossEntropyLoss()
@@ -129,6 +131,7 @@ if __name__ == "__main__":
         x= sparse_mx_to_torch_sparse_tensor(sparse_fill(shape= data.features.shape, mx= data.features[sample.input_nodes], row= sample.input_nodes)),
         adjs= list(map(lambda adj: sparse_mx_to_torch_sparse_tensor(adj).to(device), sample.adjs)),
       )
+
       loss = criterion(
         output[sample.output_nodes],
         torch.from_numpy(data.labels[sample.output_nodes]).long(),
@@ -136,6 +139,12 @@ if __name__ == "__main__":
       loss.backward()
       torch.nn.utils.clip_grad_norm_(model.module.parameters(), 0.2)
       optimizer.step()
+
+
+      if epoch == 0 and iter == 0:
+        dot = make_dot(loss.mean(), params= dict(model.module.named_parameters()))
+        dot.render("test.gv", view= True)
+
       loss = loss.detach().cpu()
       print(f"Loss {loss}", flush= True)
     # eval
@@ -149,6 +158,7 @@ if __name__ == "__main__":
       output[sample.output_nodes],
       torch.from_numpy(data.labels[sample.output_nodes]).long(),
     )
+    
     output = output.detach().cpu()
     loss = loss.detach().cpu()
     f1 = f1_score(
