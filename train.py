@@ -13,6 +13,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from sklearn.metrics import f1_score
+from sklearn.linear_model import LinearRegression
 from torchviz import make_dot
 
 from module import GCN, GCNLinear
@@ -189,7 +190,12 @@ if __name__ == "__main__":
       times.append(time.time() - start)
       losses.append(loss)
       f1s.append(f1)
-      print(f"Epoch {epoch}: Loss {loss} F1 {f1}", flush= True)
+
+      epochs = np.arange(len(times)).reshape(-1, 1)
+      reg = LinearRegression().fit(epochs, times)
+      eta = reg.predict(np.array(args.num_epochs - 1).reshape(-1, 1))[0]
+      
+      print(f"Epoch {epoch}: Loss {loss} F1 {f1} ETA {eta - time.time() + start}s", flush= True)
 
   except KeyboardInterrupt:
     pass
