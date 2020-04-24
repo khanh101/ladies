@@ -32,7 +32,7 @@ def load_random_block(cluster_size: List[int] = [5, 5], prob_matrix: List[List[f
 
     return data
 if __name__ == "__main__":
-    data = load()
+    data = load_random_block()
     num_nodes = data.adj_matrix.shape[0]
     import networkx as nx
     import matplotlib.pyplot as plt
