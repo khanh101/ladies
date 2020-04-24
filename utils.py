@@ -17,14 +17,6 @@ def sparse_fill(shape: np.ndarray, mx: sparse.csr_matrix, row: np.ndarray = None
         row = np.arange(shape[0])
     if col is None:
         col = np.arange(shape[1])
-    """
-    dense = np.zeros(shape)
-    mxdense = mx.toarray()
-    for r, rr in enumerate(row):
-        for c, cc in enumerate(col):
-            dense[rr][cc] = mxdense[r][c]
-    return sparse.csr_matrix(dense)
-    """
     lil = sparse.lil_matrix(shape)
     mx = mx.toarray()
     for r, rr in enumerate(row):
@@ -34,7 +26,7 @@ def sparse_fill(shape: np.ndarray, mx: sparse.csr_matrix, row: np.ndarray = None
 
 def row_normalize(mx):
     rowsum = np.array(mx.sum(1))
-    rowsum[rowsum == 0] = 1 # rowsum -> no need to divide
+    rowsum[rowsum == 0] = 1 # rowsum == 0 -> no need to divide
     r_inv = np.power(rowsum, -1).flatten()
     r_inv[np.isinf(r_inv)] = 0.
     r_mat_inv = sparse.diags(r_inv)

@@ -42,7 +42,7 @@ python train.py --num_nodes 1024 --num_layers 5 --sampling_method ladies --dropo
 
 # FILE STRUCTURE
 
-- `load_data.py` : code for random graph generation
+- `load_data.py` : code for random-block graph generation
 
 -  `module.py` : code for GCN module
 
