@@ -6,6 +6,8 @@ A correct version of
 
 latest update can be found at [here](https://github.com/khanhhhh/ladies)
 
+Original code [here](https://github.com/acbull/LADIES)
+
 # HOW TO RUN
 
 ```
