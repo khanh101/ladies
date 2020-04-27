@@ -126,19 +126,23 @@ if __name__ == "__main__":
   times = []
   losses = []
   f1s = []
+  train_losses = []
   next_sample_async = None
   sample = None
 
   #START TRAINING
+  print("Start training", flush= True)
   start = time.time()
   try:
+    iteration = 0
     for epoch in range(args.num_epochs):
       # train
       model.module.train() # train mode
       print(f"Epoch {epoch}: ", flush= True)
       num_iterations = int(data.num_nodes / args.batch_size)
       for iter in range(num_iterations):
-        print(f"\tIteration {iter}: ", end= "", flush= True)
+        print(f"\tIteration {iteration}: ", end= "", flush= True)
+        iteration += 1
         if next_sample_async is None:
           sample = random_sampling_train(args, model, data)
         else:
@@ -165,6 +169,7 @@ if __name__ == "__main__":
         #  dot.render("test.gv", view= True)
 
         loss = loss.detach().cpu()
+        train_losses.append(loss)
         print(f"Loss {loss}", flush= True)
       # eval
       model.module.eval() # eval mode
@@ -200,6 +205,12 @@ if __name__ == "__main__":
   print(f"Elapsed Time: {time.time() - start}")
 
   import matplotlib.pyplot as plt
+  plt.plot(np.arange(len(train_losses)), train_losses)
+  plt.title("Loss")
+  plt.xlabel("Iteration")
+  plt.ylabel("Loss")
+  plt.show()
+
   fig, axs = plt.subplots(nrows= 2, ncols= 2, constrained_layout=True)
   fig.suptitle(f"Sampling method: {args.sampling_method}, Number of nodes {args.num_nodes}")
   
