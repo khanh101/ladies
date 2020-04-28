@@ -17,12 +17,11 @@ def load_random_block(cluster_size: List[int] = [5, 5], prob_matrix: List[List[f
 
     labels = np.array(list(map(lambda node: net.nodes[node]["block"], net.nodes)))
 
-    eye = sparse.lil_matrix((num_nodes, num_nodes))
-    arange = np.arange(num_nodes)
-    np.random.shuffle(arange)
+    features = sparse.lil_matrix((num_nodes, num_nodes))
+    arange = np.random.permutation(num_nodes)
     for i in range(num_nodes):
-        eye[i, arange[i]] = 1
-    features = sparse.csr_matrix(eye)
+        features[i, arange[i]] = 1
+    features = sparse.csr_matrix(features)
 
     #eye = np.eye(num_nodes)
     #np.random.shuffle(eye)
