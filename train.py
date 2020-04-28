@@ -93,10 +93,14 @@ if __name__ == "__main__":
   half = int(all/2)
   p1 = np.log(all) / all
   p2 = p1 / all
+  print("Loading random block network", flush= True)
+  t1 = time.time()
   data = load_random_block(
     [half, all-half],
     [[p1, p2], [p2, p1]],
   )
+  t2 = time.time()
+  print(f"Loaded in {t2-t1}s")
   data.num_nodes = data.features.shape[0]
   data.in_features = data.features.shape[1]
   data.out_features = len(np.unique(data.labels))
@@ -145,10 +149,8 @@ if __name__ == "__main__":
     for epoch in range(args.num_epochs):
       # train
       model.module.train() # train mode
-      print(f"Epoch {epoch}: ", flush= True)
       num_iterations = int(data.num_nodes / args.batch_size)
       for iter in range(num_iterations):
-        print(f"\tIteration {iteration}: ", end= "", flush= True)
         iteration += 1
         if next_sample_async is None:
           sample = random_sampling_train(args, model, data)
@@ -170,14 +172,14 @@ if __name__ == "__main__":
         torch.nn.utils.clip_grad_norm_(model.module.parameters(), 0.2)
         optimizer.step()
 
-
+        # draw model
         #if epoch == 0 and iter == 0:
         #  dot = make_dot(loss.mean(), params= dict(model.module.named_parameters()))
         #  dot.render("test.gv", view= True)
 
         loss = loss.detach().cpu()
         train_losses.append(loss)
-        print(f"Loss {loss}", flush= True)
+        print(f"\tIteration {iteration}: Loss {loss}", flush= True)
       # eval
       model.module.eval() # eval mode
       sample = sampling_valid(args, model, data)

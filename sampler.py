@@ -50,7 +50,6 @@ def ladies_sampler(batch_nodes: np.ndarray, samp_num_list: np.ndarray, num_nodes
     # get number of sampled nodes
     s_num = np.min([np.sum(p > 0), samp_num_list[d]])
     p = p.view(np.ndarray).flatten()
-    pdb.set_trace()
     # sample the next layer's nodes based on the adaptively probability (p).
     after_nodes = np.random.choice(num_nodes, s_num, p = p, replace = False)
     # Add output nodes for self-loop
