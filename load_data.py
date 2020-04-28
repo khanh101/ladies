@@ -22,12 +22,6 @@ def load_random_block(cluster_size: List[int] = [5, 5], prob_matrix: List[List[f
     for i in range(num_nodes):
         features[i, arange[i]] = 1
     features = sparse.csr_matrix(features)
-
-    #eye = np.eye(num_nodes)
-    #np.random.shuffle(eye)
-    #features = sparse.csr_matrix(eye)
-
-    #features = sparse.csr_matrix(sparse.eye(num_nodes))
     
     data = SimpleNamespace(
         adj_matrix= adj_matrix,
