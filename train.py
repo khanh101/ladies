@@ -29,9 +29,13 @@ def random_sampling_train(args: SimpleNamespace, model: SimpleNamespace, data: S
     batch_nodes = data.train_nodes
   else:
     batch_nodes = np.random.choice(data.train_nodes, size= args.batch_size, replace= True)
+  if args.sampled_size <= 0 or args.sampled_size >= len(data.train_nodes):
+    sampled_size = len(data.train_nodes)
+  else:
+    sampled_size = args.sampled_size
   sample = model.sampler(
     batch_nodes= batch_nodes,
-    samp_num_list= [len(batch_nodes) for _ in range(args.num_layers)],
+    samp_num_list= [sampled_size for _ in range(args.num_layers)],
     num_nodes= data.num_nodes,
     lap_matrix= data.lap_matrix,
     lap2_matrix= data.lap2_matrix,
@@ -62,6 +66,8 @@ if __name__ == "__main__":
                       help='Number of epochs')
   parser.add_argument('--batch_size', type=int, default=64,
                       help='batch_size: number of sampled nodes at output layer')
+  parser.add_argument('--sampled_size', type=int, default=64,
+                      help='sampled_size: number of sampled nodes at hidden layers')
   parser.add_argument('--num_layers', type=int, default=5,
                       help='Number of GCN layers')
   parser.add_argument('--sampling_method', type=str, default='full',
@@ -99,6 +105,7 @@ if __name__ == "__main__":
 
   if args.sampling_method == "full":
     args.batch_size = len(data.train_nodes)
+    args.sampled_size = len(data.train_nodes)
   # create pool
   pool = mp.Pool(processes= 1)
   # create model
