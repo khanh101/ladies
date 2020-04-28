@@ -13,9 +13,10 @@ Original code [here](https://github.com/acbull/LADIES)
 ```
 usage: train.py [-h] [--hidden_features HIDDEN_FEATURES]
                 [--num_epochs NUM_EPOCHS] [--batch_size BATCH_SIZE]
-                [--num_layers NUM_LAYERS] [--sampling_method SAMPLING_METHOD]
-                [--cuda CUDA] [--dropout DROPOUT]
-                [--learning_rate LEARNING_RATE] [--num_nodes NUM_NODES]
+                [--sampled_size SAMPLED_SIZE] [--num_layers NUM_LAYERS]
+                [--sampling_method SAMPLING_METHOD] [--cuda CUDA]
+                [--dropout DROPOUT] [--learning_rate LEARNING_RATE]
+                [--num_nodes NUM_NODES]
 
 Training GCN
 
@@ -27,6 +28,8 @@ optional arguments:
                         Number of epochs
   --batch_size BATCH_SIZE
                         batch_size: number of sampled nodes at output layer
+  --sampled_size SAMPLED_SIZE
+                        sampled_size: number of sampled nodes at hidden layers
   --num_layers NUM_LAYERS
                         Number of GCN layers
   --sampling_method SAMPLING_METHOD
