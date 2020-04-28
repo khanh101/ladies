@@ -16,9 +16,18 @@ def load_random_block(cluster_size: List[int] = [5, 5], prob_matrix: List[List[f
     idx_test = idx[int(0.9 * len(idx)):]
 
     labels = np.array(list(map(lambda node: net.nodes[node]["block"], net.nodes)))
-    eye = np.eye(num_nodes)
-    np.random.shuffle(eye)
+
+    eye = sparse.lil_matrix((num_nodes, num_nodes))
+    arange = np.arange(num_nodes)
+    np.random.shuffle(arange)
+    for i in range(num_nodes):
+        eye[i, arange[i]] = 1
     features = sparse.csr_matrix(eye)
+
+    #eye = np.eye(num_nodes)
+    #np.random.shuffle(eye)
+    #features = sparse.csr_matrix(eye)
+
     #features = sparse.csr_matrix(sparse.eye(num_nodes))
     
     data = SimpleNamespace(
