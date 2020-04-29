@@ -8,6 +8,14 @@ import scipy.sparse as sparse
 import sys
 import pickle as pkl
 
+def adj_to_deg_matrix(adj_matrix: sparse.csr_matrix) -> sparse.csr_matrix:
+  deg = sparse.lil_matrix(adj_matrix.shape)
+  rowsum = np.array(adj_matrix.sum(axis= 1))
+  for i in range(adj_matrix.shape[0]):
+    deg[i, i] = rowsum[i]
+  return sparse.csr_matrix(deg)
+
+
 def adj_to_lap_matrix(adj_matrix: sparse.csr_matrix) -> sparse.csr_matrix:
   lap_matrix = adj_matrix + sparse.eye(adj_matrix.shape[0])
   return lap_matrix
@@ -25,7 +33,7 @@ def sparse_fill(shape: np.ndarray, mx: sparse.csr_matrix, row: np.ndarray = None
   return sparse.csr_matrix(lil)
 
 def row_normalize(mx):
-  rowsum = np.array(mx.sum(1))
+  rowsum = np.array(mx.sum(axis= 1))
   rowsum[rowsum == 0] = 1 # rowsum == 0 -> no need to divide
   r_inv = np.power(rowsum, -1).flatten()
   r_inv[np.isinf(r_inv)] = 0.
