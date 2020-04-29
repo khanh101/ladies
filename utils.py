@@ -8,12 +8,16 @@ import scipy.sparse as sparse
 import sys
 import pickle as pkl
 
-def adj_to_deg_matrix(adj_matrix: sparse.csr_matrix) -> sparse.csr_matrix:
-  deg = sparse.lil_matrix(adj_matrix.shape)
-  rowsum = np.array(adj_matrix.sum(axis= 1))
+def adj_to_deg_matrix(adj_matrix: sparse.csr_matrix) -> Tuple[sparse.csr_matrix, sparse.csr_matrix]:
+  deg1 = sparse.lil_matrix(adj_matrix.shape)
+  deg2 = sparse.lil_matrix(adj_matrix.shape)
+
+  rowsum = np.array(adj_matrix.sum(axis= 1)).flatten()
+  colsum = np.array(adj_matrix.sum(axis= 0)).flatten()
   for i in range(adj_matrix.shape[0]):
-    deg[i, i] = rowsum[i]
-  return sparse.csr_matrix(deg)
+    deg1[i, i] = rowsum[i]
+    deg2[i, i] = colsum[i]
+  return sparse.csr_matrix(deg1), sparse.csr_matrix(deg2)
 
 
 def adj_to_lap_matrix(adj_matrix: sparse.csr_matrix) -> sparse.csr_matrix:

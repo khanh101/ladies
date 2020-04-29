@@ -8,6 +8,7 @@ import time
 
 import numpy as np
 import scipy as sp
+import scipy.sparse as sparse
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -19,7 +20,7 @@ from torchviz import make_dot
 from module import GCN, GCNLinear
 from load_data import load_random_block
 from sampler import full_sampler, ladies_sampler
-from utils import adj_to_lap_matrix, row_normalize, sparse_mx_to_torch_sparse_tensor, sparse_fill
+from utils import adj_to_lap_matrix, adj_to_deg_matrix, row_normalize, sparse_mx_to_torch_sparse_tensor, sparse_fill
 
 
 #np.seterr(all="raise")
@@ -111,9 +112,10 @@ if __name__ == "__main__":
   data.out_features = len(np.unique(data.labels))
   data.lap_matrix = row_normalize(adj_to_lap_matrix(data.adj_matrix))
   data.lap2_matrix = data.lap_matrix.multiply(data.lap_matrix)
-  data.p_matrix = data.lap_matrix
+  data.deg_matrix1, data.deg_matrix2 = adj_to_deg_matrix(data.adj_matrix)
+  #data.p_matrix = data.lap_matrix
   r = np.sqrt(all * (p1+p2)/2)
-  #data.p_matrix = (r**2 - 1) - r * data.adj_matrix + 
+  data.p_matrix = sparse.csr_matrix((r**2 - 1) - r * data.adj_matrix.toarray() + data.deg_matrix1.toarray())
 
   if args.sampling_method == "full":
     args.batch_size = len(data.train_nodes)
