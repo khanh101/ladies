@@ -40,8 +40,7 @@ optional arguments:
                         learning rate
   --num_nodes NUM_NODES
                         number of network nodes in random block model
-  --p_matrix P_MATRIX   p_matrix: normalized_laplacian/normalized_adjacency/be
-                        the_hessian
+  --p_matrix P_MATRIX   p_matrix: laplacian/adjacency/bethe_hessian
 ```
 
 - Example

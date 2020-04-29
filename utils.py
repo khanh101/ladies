@@ -37,6 +37,7 @@ def sparse_fill(shape: np.ndarray, mx: sparse.csr_matrix, row: np.ndarray = None
   return sparse.csr_matrix(lil)
 
 def row_normalize(mx):
+  mx = sparse.csr_matrix(mx, dtype= sp.float32)
   rowsum = np.array(mx.sum(axis= 1))
   rowsum[rowsum == 0] = 1 # rowsum == 0 -> no need to divide
   r_inv = np.power(rowsum, -1).flatten()

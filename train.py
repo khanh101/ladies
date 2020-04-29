@@ -81,8 +81,8 @@ if __name__ == "__main__":
                     help='learning rate')
   parser.add_argument('--num_nodes', type=int, default=100,
                       help='number of network nodes in random block model')
-  parser.add_argument('--p_matrix', type=str, default='normalized_laplacian',
-                      help='p_matrix: normalized_laplacian/normalized_adjacency/bethe_hessian')
+  parser.add_argument('--p_matrix', type=str, default='adjacency',
+                      help='p_matrix: laplacian/adjacency/bethe_hessian')
 
   args = parser.parse_args()
   print(args)
@@ -117,11 +117,11 @@ if __name__ == "__main__":
   data.deg_in_matrix, data.deg_out_matrix = adj_to_deg_matrix(data.adj_matrix)
   r = np.sqrt(all * (p1+p2)/2)
   data.bethe_hessian_matrix = sparse.csr_matrix((r**2 - 1) * np.eye(data.adj_matrix.shape[0]) - r * data.adj_matrix.toarray() + data.deg_in_matrix.toarray())
-  if args.p_matrix == "normalized_adjacency":
+  if args.p_matrix == "adjacency":
     data.p_matrix = row_normalize(data.adj_matrix)
   if args.p_matrix == "bethe_hessian":
     data.p_matrix = row_normalize(data.bethe_hessian_matrix)
-  if args.p_matrix == "normalized_laplacian":
+  if args.p_matrix == "laplacian":
     data.p_matrix = data.norm_lap_matrix
 
   if args.sampling_method == "full":
