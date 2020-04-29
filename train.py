@@ -39,7 +39,7 @@ def random_sampling_train(args: SimpleNamespace, model: SimpleNamespace, data: S
     samp_num_list= [sampled_size for _ in range(args.num_layers)],
     num_nodes= data.num_nodes,
     p_matrix= data.p_matrix,
-    lap2_matrix= data.lap2_matrix,
+    lap2_matrix= data.norm_lap2_matrix,
     num_layers= args.num_layers,
   )
   return sample
@@ -81,6 +81,8 @@ if __name__ == "__main__":
                     help='learning rate')
   parser.add_argument('--num_nodes', type=int, default=100,
                       help='number of network nodes in random block model')
+  parser.add_argument('--p_matrix', type=str, default='normalized_laplacian',
+                      help='p_matrix: normalized_laplacian/normalized_adjacency/bethe_hessian')
 
   args = parser.parse_args()
   print(args)
@@ -110,11 +112,17 @@ if __name__ == "__main__":
   data.num_nodes = data.features.shape[0]
   data.in_features = data.features.shape[1]
   data.out_features = len(np.unique(data.labels))
-  data.lap_matrix = row_normalize(adj_to_lap_matrix(data.adj_matrix))
-  data.lap2_matrix = data.lap_matrix.multiply(data.lap_matrix)
+  data.norm_lap_matrix = row_normalize(adj_to_lap_matrix(data.adj_matrix))
+  data.norm_lap2_matrix = data.norm_lap_matrix.multiply(data.norm_lap_matrix)
   data.deg_in_matrix, data.deg_out_matrix = adj_to_deg_matrix(data.adj_matrix)
-  # normalized laplacian matrix
-  data.p_matrix = data.lap_matrix
+  r = np.sqrt(all * (p1+p2)/2)
+  data.bethe_hessian_matrix = sparse.csr_matrix((r**2 - 1) * np.eye(data.adj_matrix.shape[0]) - r * data.adj_matrix.toarray() + data.deg_in_matrix.toarray())
+  if args.p_matrix == "normalized_adjacency":
+    data.p_matrix = row_normalize(data.adj_matrix)
+  if args.p_matrix == "bethe_hessian":
+    data.p_matrix = row_normalize(data.bethe_hessian_matrix)
+  if args.p_matrix == "normalized_laplacian":
+    data.p_matrix = data.norm_lap_matrix
 
   if args.sampling_method == "full":
     args.batch_size = len(data.train_nodes)

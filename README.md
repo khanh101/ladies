@@ -16,7 +16,7 @@ usage: train.py [-h] [--hidden_features HIDDEN_FEATURES]
                 [--sampled_size SAMPLED_SIZE] [--num_layers NUM_LAYERS]
                 [--sampling_method SAMPLING_METHOD] [--cuda CUDA]
                 [--dropout DROPOUT] [--learning_rate LEARNING_RATE]
-                [--num_nodes NUM_NODES]
+                [--num_nodes NUM_NODES] [--p_matrix P_MATRIX]
 
 Training GCN
 
@@ -40,6 +40,8 @@ optional arguments:
                         learning rate
   --num_nodes NUM_NODES
                         number of network nodes in random block model
+  --p_matrix P_MATRIX   p_matrix: normalized_laplacian/normalized_adjacency/be
+                        the_hessian
 ```
 
 - Example
