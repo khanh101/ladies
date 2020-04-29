@@ -114,10 +114,7 @@ if __name__ == "__main__":
   data.lap2_matrix = data.lap_matrix.multiply(data.lap_matrix)
   data.deg_in_matrix, data.deg_out_matrix = adj_to_deg_matrix(data.adj_matrix)
   # normalized laplacian matrix
-  #data.p_matrix = data.lap_matrix
-  # bethe hessian matrix
-  r = np.sqrt(all * (p1+p2)/2)
-  data.p_matrix = sparse.csr_matrix((r**2 - 1) - r * data.adj_matrix.toarray() + data.deg_in_matrix.toarray())
+  data.p_matrix = data.lap_matrix
 
   if args.sampling_method == "full":
     args.batch_size = len(data.train_nodes)
