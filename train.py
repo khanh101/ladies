@@ -82,7 +82,7 @@ if __name__ == "__main__":
   parser.add_argument('--num_nodes', type=int, default=100,
                       help='number of network nodes in random block model')
   parser.add_argument('--p_matrix', type=str, default='adjacency',
-                      help='p_matrix: laplacian/adjacency/bethe_hessian')
+                      help='laplacian/adjacency/bethe_hessian')
 
   args = parser.parse_args()
   print(args)
