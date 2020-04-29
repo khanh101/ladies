@@ -37,7 +37,7 @@ def random_sampling_train(args: SimpleNamespace, model: SimpleNamespace, data: S
     batch_nodes= batch_nodes,
     samp_num_list= [sampled_size for _ in range(args.num_layers)],
     num_nodes= data.num_nodes,
-    lap_matrix= data.lap_matrix,
+    p_matrix= data.lap_matrix,
     lap2_matrix= data.lap2_matrix,
     num_layers= args.num_layers,
   )
@@ -49,7 +49,7 @@ def sampling_valid(args: SimpleNamespace, model: SimpleNamespace, data: SimpleNa
     batch_nodes= np.arange(data.num_nodes),
     samp_num_list= None,
     num_nodes= data.num_nodes,
-    lap_matrix= data.lap_matrix,
+    p_matrix= data.lap_matrix,
     lap2_matrix= None,
     num_layers= args.num_layers,
   )
@@ -92,7 +92,12 @@ if __name__ == "__main__":
   all = args.num_nodes
   half = int(all/2)
   p1 = np.log(all) / all
-  p2 = p1 / all
+  #p2 = p1 / all
+  # theoretical limit p2
+  p2 = p1
+  for i in range(50):
+    p2 = p1 - 2 * np.sqrt((p1+p2) * all/2) / all
+
   print("Loading random block network", flush= True)
   t1 = time.time()
   data = load_random_block(
