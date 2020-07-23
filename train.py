@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-import pdb
 import argparse
-from typing import List, Dict
 from types import SimpleNamespace
 import multiprocessing as mp
 import time

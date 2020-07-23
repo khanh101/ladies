@@ -2,11 +2,13 @@ from typing import Tuple
 
 import torch
 import numpy as np
-import scipy as sp
 import scipy.sparse as sparse
 
 
 def adj_to_deg_matrix(adj_matrix: sparse.csr_matrix) -> Tuple[sparse.csr_matrix, sparse.csr_matrix]:
+    """
+    Adjacency matrix to Degree matrix
+    """
     deg_in = sparse.lil_matrix(adj_matrix.shape)
     deg_out = sparse.lil_matrix(adj_matrix.shape)
 
@@ -19,12 +21,21 @@ def adj_to_deg_matrix(adj_matrix: sparse.csr_matrix) -> Tuple[sparse.csr_matrix,
 
 
 def adj_to_lap_matrix(adj_matrix: sparse.csr_matrix) -> sparse.csr_matrix:
+    """
+    Adjacency matrix to Laplacian matrix
+    """
     lap_matrix = adj_matrix + sparse.eye(adj_matrix.shape[0])
     return lap_matrix
 
 
 def sparse_fill(shape: np.ndarray, mx: sparse.csr_matrix, row: np.ndarray = None,
                 col: np.ndarray = None) -> sparse.csr_matrix:
+    """
+    Fill a (m, n) matrix into m x n entries in a (M, N) matrix
+    shape : (M, N)
+    mx: (m, n) matrix
+    row, col: filled-in rows and columns
+    """
     if row is None:
         row = np.arange(shape[0])
     if col is None:
@@ -37,8 +48,10 @@ def sparse_fill(shape: np.ndarray, mx: sparse.csr_matrix, row: np.ndarray = None
     return sparse.csr_matrix(lil)
 
 
-def row_normalize(mx):
-    mx = sparse.csr_matrix(mx, dtype=sp.float32)
+def row_normalize(mx: sparse.csr_matrix):
+    """
+    Row-normalize a matrix
+    """
     row_sum = np.array(mx.sum(axis=1))
     row_sum[row_sum == 0] = 1  # row_sum == 0 -> no need to divide
     r_inv = np.power(row_sum, -1).flatten()
@@ -49,13 +62,15 @@ def row_normalize(mx):
     return mx
 
 
-def sparse_mx_to_torch_sparse_tensor(sparse_mx: sparse.csr_matrix) -> torch.FloatTensor:
-    """Convert a scipy sparse matrix to a torch sparse tensor."""
-    sparse_mx = sparse_mx.tocoo().astype(np.float32)
-    if len(sparse_mx.row) == 0 and len(sparse_mx.col) == 0:
+def sparse_mx_to_torch_sparse_tensor(mx: sparse.csr_matrix) -> torch.FloatTensor:
+    """
+    Convert a scipy sparse matrix to a pytorch sparse tensor.
+    """
+    mx = mx.tocoo().astype(np.float32)
+    if len(mx.row) == 0 and len(mx.col) == 0:
         indices = torch.LongTensor([[], []])
     else:
-        indices = torch.from_numpy(np.vstack((sparse_mx.row, sparse_mx.col)).astype(np.int64))
-    values = torch.from_numpy(sparse_mx.data)
-    shape = torch.Size(sparse_mx.shape)
+        indices = torch.from_numpy(np.vstack((mx.row, mx.col)).astype(np.int64))
+    values = torch.from_numpy(mx.data)
+    shape = torch.Size(mx.shape)
     return torch.sparse.FloatTensor(indices, values, shape)

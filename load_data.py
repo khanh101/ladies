@@ -1,4 +1,3 @@
-import pdb
 import numpy as np
 from types import SimpleNamespace
 from typing import List
@@ -9,7 +8,7 @@ import networkx as nx
 def load_random_block(cluster_size: List[int] = [5, 5],
                       prob_matrix: List[List[float]] = [[1, 0], [0, 1]]) -> SimpleNamespace:
     net = nx.generators.community.stochastic_block_model(cluster_size, prob_matrix)
-    adj_matrix = nx.adjacency_matrix(net)
+    adj_matrix = nx.adjacency_matrix(net).astype(np.float32)
     num_nodes = sum(cluster_size)
     idx = np.random.permutation(num_nodes)
     idx_train = idx[:int(0.8 * len(idx))]
