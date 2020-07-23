@@ -4,9 +4,9 @@ A correct version of
 
 `Code for NeurIPS'19 "Layer-Dependent Importance Sampling for Training Deep and Large Graph Convolutional Networks"`
 
-latest update can be found at [here](https://github.com/khanhhhh/ladies)
+latest update can be found at [https://github.com/khanhhhh/ladies](https://github.com/khanhhhh/ladies)
 
-Original code [here](https://github.com/acbull/LADIES)
+Original code [https://github.com/acbull/LADIES](https://github.com/acbull/LADIES)
 
 # HOW TO RUN
 
